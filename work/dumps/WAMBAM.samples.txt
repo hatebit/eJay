@@ -1,0 +1,17 @@
+bar,track,sample
+1,1,zap\nup 4
+3,1,zap\nup4
+4,1,de\nflate
+4,4,dj\n1L
+4,5,dj\n1R
+
+61,2,mush\n9
+61,13,big-drop\nsugar 4L
+61,14,big-drop\nsugar 4R
+62,2,mush\n9
+63,2,mush\n9
+63,9,orion\n2
+64,4,dj\n1L
+64,5,dj\n1R
+64,13,thunder\nL
+64,14,thunder\nR

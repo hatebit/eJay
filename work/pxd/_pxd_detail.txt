@@ -1,0 +1,1154 @@
+==================================================================
+W2P  RVA=0x104c6  insns=40  ret=0,8  ebp+['0x8', '0xc']  ebp-16..  regs=ecx
+  104c6  push                 ebp
+  104c7  mov                  ebp, esp
+  104c9  push                 -1
+  104cb  push                 0x10040b7b
+  104d0  mov                  eax, dword ptr fs:[0]
+  104d6  push                 eax
+  104d7  mov                  dword ptr fs:[0], esp
+  104de  push                 ecx
+  104df  push                 ebx
+  104e0  push                 esi
+  104e1  push                 edi
+  104e2  mov                  dword ptr [ebp - 0x10], esp
+==================================================================
+Extra  RVA=0x10682  insns=21  ret=0  ebp+[]  ebp-0..  regs=-
+  10682  push                 ebp
+  10683  mov                  ebp, esp
+  10685  cmp                  dword ptr [0x10096ccc], 0
+  1068c  jne                  0x100106c8
+  1068e  push                 0x1004b2b0
+  10693  push                 1
+  10695  push                 1
+  10697  push                 8
+  10699  push                 8
+  1069b  call                 dword ptr [0x1004302c]  ; GDI32.dll!CreateBitmap
+  106a1  mov                  dword ptr [0x100829ec], eax
+  106a6  mov                  eax, dword ptr [0x100829ec]
+==================================================================
+ANummer  RVA=0x106cc  insns=5  ret=0  ebp+[]  ebp-0..  regs=-
+  106cc  push                 ebp
+  106cd  mov                  ebp, esp
+  106cf  mov                  eax, 0x1879487
+  106d4  pop                  ebp
+  106d5  ret                  
+==================================================================
+ExtraAus  RVA=0x106d6  insns=14  ret=0  ebp+[]  ebp-0..  regs=-
+  106d6  push                 ebp
+  106d7  mov                  ebp, esp
+  106d9  cmp                  dword ptr [0x10096ccc], 1
+  106e0  jne                  0x10010705
+  106e2  mov                  eax, dword ptr [0x100829f4]
+  106e7  push                 eax
+  106e8  call                 dword ptr [0x10043028]  ; GDI32.dll!DeleteObject
+  106ee  mov                  ecx, dword ptr [0x100829ec]
+  106f4  push                 ecx
+  106f5  call                 dword ptr [0x10043028]  ; GDI32.dll!DeleteObject
+  106fb  mov                  dword ptr [0x10096ccc], 0
+  10705  mov                  eax, 1
+==================================================================
+AGetFree  RVA=0x1070c  insns=80  ret=4  ebp+['0x8']  ebp-224..  regs=-
+  1070c  push                 ebp
+  1070d  mov                  ebp, esp
+  1070f  sub                  esp, 0xe0
+  10715  mov                  dword ptr [ebp - 0xd0], 0
+  1071f  mov                  dword ptr [ebp - 0xcc], 0
+  10729  mov                  eax, dword ptr [ebp + 8]
+  1072c  add                  eax, 0x41
+  1072f  movsx                ecx, al
+  10732  push                 ecx
+  10733  push                 0x1004b320
+  10738  lea                  edx, [ebp - 0xc8]
+  1073e  push                 edx
+==================================================================
+AGetFull  RVA=0x1084b  insns=111  ret=4  ebp+['0x8']  ebp-228..  regs=-
+  1084b  push                 ebp
+  1084c  mov                  ebp, esp
+  1084e  sub                  esp, 0xe4
+  10854  mov                  dword ptr [ebp - 0xd0], 0
+  1085e  mov                  dword ptr [ebp - 0xcc], 0
+  10868  mov                  eax, dword ptr [ebp + 8]
+  1086b  add                  eax, 0x41
+  1086e  movsx                ecx, al
+  10871  push                 ecx
+  10872  push                 0x1004b328
+  10877  lea                  edx, [ebp - 0xc8]
+  1087d  push                 edx
+==================================================================
+ASortOut  RVA=0x10a8e  insns=9  ret=0  ebp+[]  ebp-0..  regs=-
+  10a8e  push                 ebp
+  10a8f  mov                  ebp, esp
+  10a91  mov                  ax, word ptr [0x1008e41c]
+  10a97  add                  ax, 1
+  10a9b  mov                  word ptr [0x1008e41c], ax
+  10aa1  movsx                ecx, word ptr [0x1008e41c]
+  10aa8  movsx                eax, word ptr [ecx*2 + 0x1009085e]
+  10ab0  pop                  ebp
+  10ab1  ret                  
+==================================================================
+ASortStart  RVA=0x10ab2  insns=12  ret=0  ebp+[]  ebp-0..  regs=-
+  10ab2  push                 ebp
+  10ab3  mov                  ebp, esp
+  10ab5  push                 0x10010b74
+  10aba  push                 2
+  10abc  movsx                eax, word ptr [0x1008e41c]
+  10ac3  push                 eax
+  10ac4  push                 0x10090860
+  10ac9  call                 0x100323d4  ; internal 0x323d4
+  10ace  add                  esp, 0x10
+  10ad1  xor                  eax, eax
+  10ad3  pop                  ebp
+  10ad4  ret                  
+==================================================================
+ASortStart2  RVA=0x10ad5  insns=12  ret=0  ebp+[]  ebp-0..  regs=-
+  10ad5  push                 ebp
+  10ad6  mov                  ebp, esp
+  10ad8  push                 0x10010bb6
+  10add  push                 2
+  10adf  movsx                eax, word ptr [0x1008e41c]
+  10ae6  push                 eax
+  10ae7  push                 0x10090860
+  10aec  call                 0x100323d4  ; internal 0x323d4
+  10af1  add                  esp, 0x10
+  10af4  xor                  eax, eax
+  10af6  pop                  ebp
+  10af7  ret                  
+==================================================================
+ASortInit  RVA=0x10af8  insns=6  ret=0  ebp+[]  ebp-0..  regs=eax
+  10af8  push                 ebp
+  10af9  mov                  ebp, esp
+  10afb  mov                  word ptr [0x1008e41c], 0
+  10b04  xor                  eax, eax
+  10b06  pop                  ebp
+  10b07  ret                  
+==================================================================
+ASortIn  RVA=0x10b08  insns=28  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  10b08  push                 ebp
+  10b09  mov                  ebp, esp
+  10b0b  movsx                eax, word ptr [0x1008e41c]
+  10b12  cmp                  eax, 0x1900
+  10b17  jge                  0x10010b6e
+  10b19  movsx                ecx, word ptr [0x1008e41c]
+  10b20  mov                  dx, word ptr [0x1008e41c]
+  10b27  mov                  word ptr [ecx*2 + 0x10090860], dx
+  10b2f  cmp                  dword ptr [ebp + 8], 0
+  10b33  je                   0x10010b5c
+  10b35  mov                  eax, dword ptr [ebp + 8]
+  10b38  movsx                ecx, byte ptr [eax]
+==================================================================
+AMitte  RVA=0x112b6  insns=35  ret=8  ebp+['0x8', '0xc']  ebp-0..  regs=-
+  112b6  push                 ebp
+  112b7  mov                  ebp, esp
+  112b9  cmp                  dword ptr [ebp + 8], 0
+  112bd  jl                   0x100112c5
+  112bf  cmp                  dword ptr [ebp + 8], 0x30
+  112c3  jle                  0x100112c9
+  112c5  xor                  eax, eax
+  112c7  jmp                  0x1001133c  ; internal 0x1133c
+  112c9  cmp                  dword ptr [ebp + 0xc], 0x75
+  112cd  jl                   0x100112ec
+  112cf  cmp                  dword ptr [ebp + 0xc], 0x8b
+  112d6  jg                   0x100112ec
+==================================================================
+ATyp  RVA=0x11340  insns=48  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  11340  push                 ebp
+  11341  mov                  ebp, esp
+  11343  cmp                  dword ptr [ebp + 8], 0x64
+  11347  jge                  0x10011453
+  1134d  mov                  eax, dword ptr [ebp + 8]
+  11350  mov                  dword ptr [0x1008e358], eax
+  11355  mov                  dword ptr [0x1004b2d0], 0x1275
+  1135f  mov                  dword ptr [0x1004b2d4], 0x1275
+  11369  mov                  dword ptr [0x1004b2d8], 0x1275
+  11373  mov                  dword ptr [0x10096cdc], 0
+  1137d  mov                  dword ptr [0x1004b2dc], 0x24ea
+  11387  mov                  dword ptr [0x1004b2e0], 0x24ea
+==================================================================
+AFenster  RVA=0x1148b  insns=7  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  1148b  push                 ebp
+  1148c  mov                  ebp, esp
+  1148e  mov                  eax, dword ptr [ebp + 8]
+  11491  mov                  dword ptr [0x1008e378], eax
+  11496  mov                  eax, 1
+  1149b  pop                  ebp
+  1149c  ret                  4
+==================================================================
+AInit  RVA=0x1149f  insns=157  ret=4  ebp+['0x8']  ebp-8..  regs=-
+  1149f  push                 ebp
+  114a0  mov                  ebp, esp
+  114a2  sub                  esp, 8
+  114a5  mov                  dword ptr [0x10096cf8], 0
+  114af  mov                  dword ptr [0x10096ce4], 0
+  114b9  mov                  dword ptr [0x10096ce8], 0
+  114c3  mov                  dword ptr [0x10096cec], 0
+  114cd  mov                  dword ptr [0x10096cf0], 0
+  114d7  mov                  eax, dword ptr [ebp + 8]
+  114da  mov                  dword ptr [0x1008e378], eax
+  114df  mov                  dword ptr [0x100825c0], 0
+  114e9  mov                  dword ptr [0x100825c4], 0
+==================================================================
+AWaveDauer  RVA=0x125a5  insns=163  ret=4  ebp+['0x8']  ebp-304..  regs=-
+  125a5  push                 ebp
+  125a6  mov                  ebp, esp
+  125a8  sub                  esp, 0x130
+  125ae  mov                  dword ptr [ebp - 4], 0
+  125b5  push                 0
+  125b7  push                 0
+  125b9  push                 3
+  125bb  push                 0
+  125bd  push                 1
+  125bf  push                 0x80000000
+  125c4  mov                  eax, dword ptr [ebp + 8]
+  125c7  push                 eax
+==================================================================
+BWaveDauer  RVA=0x1284c  insns=170  ret=0,0xc  ebp+['0x8', '0xc', '0x10']  ebp-316..  regs=ecx
+  1284c  push                 ebp
+  1284d  mov                  ebp, esp
+  1284f  push                 -1
+  12851  push                 0x10040ce4
+  12856  mov                  eax, dword ptr fs:[0]
+  1285c  push                 eax
+  1285d  mov                  dword ptr fs:[0], esp
+  12864  push                 ecx
+  12865  sub                  esp, 0x12c
+  1286b  push                 ebx
+  1286c  push                 esi
+  1286d  push                 edi
+==================================================================
+ADevice  RVA=0x12aea  insns=346  ret=4  ebp+[]  ebp-88..  regs=-
+  12aea  push                 ebp
+  12aeb  mov                  ebp, esp
+  12aed  sub                  esp, 0x58
+  12af0  mov                  word ptr [0x10096de0], 0
+  12af9  call                 dword ptr [0x1004322c]  ; WINMM.dll!waveOutGetNumDevs
+  12aff  mov                  word ptr [ebp - 4], ax
+  12b03  mov                  word ptr [0x1008bbe0], 0
+  12b0c  mov                  word ptr [ebp - 8], 0
+  12b12  jmp                  0x10012b20  ; internal 0x12b20
+  12b14  mov                  ax, word ptr [ebp - 8]
+  12b18  add                  ax, 1
+  12b1c  mov                  word ptr [ebp - 8], ax
+==================================================================
+ALautSet  RVA=0x1300e  insns=91  ret=4  ebp+['0x8']  ebp-24..  regs=-
+  1300e  push                 ebp
+  1300f  mov                  ebp, esp
+  13011  sub                  esp, 0x18
+  13014  mov                  eax, dword ptr [ebp + 8]
+  13017  mov                  dword ptr [0x10082ad8], eax
+  1301c  mov                  ecx, dword ptr [ebp + 8]
+  1301f  push                 ecx
+  13020  call                 0x10018b34  ; internal 0x18b34
+  13025  add                  esp, 4
+  13028  test                 eax, eax
+  1302a  je                   0x10013033
+  1302c  xor                  eax, eax
+==================================================================
+ALautGet  RVA=0x13182  insns=7  ret=4  ebp+[]  ebp-0..  regs=-
+  13182  push                 ebp
+  13183  mov                  ebp, esp
+  13185  call                 0x10018da6  ; internal 0x18da6
+  1318a  mov                  dword ptr [0x10082ad8], eax
+  1318f  mov                  eax, dword ptr [0x10082ad8]
+  13194  pop                  ebp
+  13195  ret                  4
+==================================================================
+RGetName  RVA=0x1333c  insns=5  ret=8  ebp+[]  ebp-0..  regs=-
+  1333c  push                 ebp
+  1333d  mov                  ebp, esp
+  1333f  mov                  eax, 1
+  13344  pop                  ebp
+  13345  ret                  8
+==================================================================
+ARecTest  RVA=0x13348  insns=85  ret=4  ebp+['0x8']  ebp-160..  regs=-
+  13348  push                 ebp
+  13349  mov                  ebp, esp
+  1334b  sub                  esp, 0xa0
+  13351  mov                  eax, dword ptr [ebp + 8]
+  13354  push                 eax
+  13355  push                 0x10066810
+  1335a  call                 dword ptr [0x100430f0]  ; KERNEL32.dll!lstrcpyA
+  13360  movsx                ecx, word ptr [0x10096d54]
+  13367  cmp                  ecx, 1
+  1336a  jne                  0x10013371
+  1336c  call                 0x10013aa7  ; ARecStop
+  13371  mov                  dword ptr [0x10096df0], 0
+==================================================================
+ARecDuplex  RVA=0x13525  insns=6  ret=4  ebp+[]  ebp-0..  regs=-
+  13525  push                 ebp
+  13526  mov                  ebp, esp
+  13528  mov                  dword ptr [0x10096cfc], 1
+  13532  movsx                eax, word ptr [0x10096de0]
+  13539  pop                  ebp
+  1353a  ret                  4
+==================================================================
+ARecInit  RVA=0x1353d  insns=130  ret=4  ebp+[]  ebp-24..  regs=-
+  1353d  push                 ebp
+  1353e  mov                  ebp, esp
+  13540  sub                  esp, 0x18
+  13543  cmp                  dword ptr [0x10096dfc], 0x2a90cb20
+  1354d  je                   0x1001355b
+  1354f  movsx                eax, word ptr [0x10096de0]
+  13556  jmp                  0x1001377f  ; internal 0x1377f
+  1355b  movsx                eax, word ptr [0x10096d54]
+  13562  cmp                  eax, 1
+  13565  jne                  0x1001356c
+  13567  call                 0x10013aa7  ; ARecStop
+  1356c  mov                  dword ptr [0x10096df0], 0
+==================================================================
+AGetString  RVA=0x13785  insns=42  ret=8  ebp+['0x8', '0xc']  ebp-220..  regs=-
+  13785  push                 ebp
+  13786  mov                  ebp, esp
+  13788  sub                  esp, 0xdc
+  1378e  cmp                  dword ptr [ebp + 0xc], 0
+  13792  jne                  0x100137a5
+  13794  push                 0x100823fc
+  13799  mov                  eax, dword ptr [ebp + 8]
+  1379c  push                 eax
+  1379d  call                 dword ptr [0x100430f0]  ; KERNEL32.dll!lstrcpyA
+  137a3  jmp                  0x10013805  ; internal 0x13805
+  137a5  cmp                  dword ptr [ebp + 0xc], 1
+  137a9  jne                  0x100137bc
+==================================================================
+ARecStart  RVA=0x1380d  insns=35  ret=0  ebp+[]  ebp-0..  regs=-
+  1380d  push                 ebp
+  1380e  mov                  ebp, esp
+  13810  cmp                  dword ptr [0x10096dfc], 0x2a90cb20
+  1381a  je                   0x10013828
+  1381c  movsx                eax, word ptr [0x10096de0]
+  13823  jmp                  0x100138b4  ; internal 0x138b4
+  13828  mov                  dword ptr [0x1008bac0], 0
+  13832  mov                  word ptr [0x1008e648], 0
+  1383b  mov                  eax, dword ptr [0x10096dec]
+  13840  push                 eax
+  13841  call                 dword ptr [0x10043248]  ; WINMM.dll!waveInStart
+  13847  test                 eax, eax
+==================================================================
+ARecPlay  RVA=0x138b6  insns=10  ret=0  ebp+[]  ebp-0..  regs=-
+  138b6  push                 ebp
+  138b7  mov                  ebp, esp
+  138b9  cmp                  dword ptr [0x10096dfc], 0x2a90cb20
+  138c3  je                   0x100138ce
+  138c5  movsx                eax, word ptr [0x10096de0]
+  138cc  jmp                  0x100138d8  ; internal 0x138d8
+  138ce  push                 0x100823fc
+  138d3  call                 0x100125a5  ; AWaveDauer
+  138d8  pop                  ebp
+  138d9  ret                  
+==================================================================
+ARecInput  RVA=0x138da  insns=9  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  138da  push                 ebp
+  138db  mov                  ebp, esp
+  138dd  mov                  eax, dword ptr [ebp + 8]
+  138e0  push                 eax
+  138e1  call                 0x100188ea  ; internal 0x188ea
+  138e6  add                  esp, 4
+  138e9  xor                  eax, eax
+  138eb  pop                  ebp
+  138ec  ret                  4
+==================================================================
+ARecStop  RVA=0x13aa7  insns=323  ret=0  ebp+[]  ebp-176..  regs=-
+  13aa7  push                 ebp
+  13aa8  mov                  ebp, esp
+  13aaa  sub                  esp, 0xb0
+  13ab0  mov                  dword ptr [ebp - 8], 0
+  13ab7  mov                  word ptr [0x10096de0], 0
+  13ac0  cmp                  dword ptr [0x10096dfc], 0x2a90cb20
+  13aca  je                   0x10013ad8
+  13acc  movsx                eax, word ptr [0x10096de0]
+  13ad3  jmp                  0x10013fde  ; internal 0x13fde
+  13ad8  cmp                  dword ptr [0x10096dec], 0
+  13adf  je                   0x10013ba2
+  13ae5  mov                  eax, dword ptr [0x10096dec]
+==================================================================
+ARecPegel  RVA=0x13fe2  insns=9  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  13fe2  push                 ebp
+  13fe3  mov                  ebp, esp
+  13fe5  cmp                  dword ptr [ebp + 8], 0
+  13fe9  jne                  0x10013ff2
+  13feb  mov                  eax, dword ptr [0x10082600]
+  13ff0  jmp                  0x10013ff7  ; internal 0x13ff7
+  13ff2  mov                  eax, dword ptr [0x10066808]
+  13ff7  pop                  ebp
+  13ff8  ret                  4
+==================================================================
+ARecTimer  RVA=0x13ffb  insns=125  ret=0  ebp+[]  ebp-8..  regs=-
+  13ffb  push                 ebp
+  13ffc  mov                  ebp, esp
+  13ffe  sub                  esp, 8
+  14001  cmp                  dword ptr [0x10096dfc], 0x2a90cb20
+  1400b  je                   0x10014019
+  1400d  movsx                eax, word ptr [0x10096de0]
+  14014  jmp                  0x1001422f  ; internal 0x1422f
+  14019  cmp                  dword ptr [0x10096df0], 0
+  14020  je                   0x10014228
+  14026  cmp                  dword ptr [0x10096dec], 0
+  1402d  je                   0x10014228
+  14033  movsx                eax, word ptr [0x1008e648]
+==================================================================
+AExport  RVA=0x1437d  insns=70  ret=8  ebp+['0x8', '0xc']  ebp-0..  regs=-
+  1437d  push                 ebp
+  1437e  mov                  ebp, esp
+  14380  cmp                  dword ptr [0x10096dfc], 0x2a90cb20
+  1438a  je                   0x10014398
+  1438c  movsx                eax, word ptr [0x10096de0]
+  14393  jmp                  0x100144c5  ; internal 0x144c5
+  14398  mov                  byte ptr [0x10082224], 0
+  1439f  mov                  eax, dword ptr [ebp + 8]
+  143a2  push                 eax
+  143a3  push                 0x10082224
+  143a8  call                 dword ptr [0x100430f0]  ; KERNEL32.dll!lstrcpyA
+  143ae  movsx                ecx, byte ptr [0x10082224]
+==================================================================
+AStop  RVA=0x14516  insns=16  ret=0  ebp+[]  ebp-0..  regs=-
+  14516  push                 ebp
+  14517  mov                  ebp, esp
+  14519  mov                  dword ptr [0x10096d30], 0
+  14523  mov                  dword ptr [0x10096d34], 0
+  1452d  mov                  dword ptr [0x10082bec], 0
+  14537  mov                  dword ptr [0x10096d88], 1
+  14541  mov                  dword ptr [0x10093a7c], 0
+  1454b  mov                  dword ptr [0x100826b8], 0
+  14555  mov                  dword ptr [0x1008b764], 0
+  1455f  mov                  dword ptr [0x100835a8], 0
+  14569  mov                  dword ptr [0x10096d18], 0
+  14573  mov                  dword ptr [0x1008e63c], 0
+==================================================================
+Fade  RVA=0x14765  insns=5  ret=0  ebp+[]  ebp-0..  regs=-
+  14765  push                 ebp
+  14766  mov                  ebp, esp
+  14768  mov                  eax, 1
+  1476d  pop                  ebp
+  1476e  ret                  
+==================================================================
+AEnd  RVA=0x1710e  insns=79  ret=0  ebp+[]  ebp-156..  regs=ecx
+  1710e  push                 ebp
+  1710f  mov                  ebp, esp
+  17111  push                 -1
+  17113  push                 0x10040d0c
+  17118  mov                  eax, dword ptr fs:[0]
+  1711e  push                 eax
+  1711f  mov                  dword ptr fs:[0], esp
+  17126  push                 ecx
+  17127  sub                  esp, 0x8c
+  1712d  push                 ebx
+  1712e  push                 esi
+  1712f  push                 edi
+==================================================================
+ATimer  RVA=0x1724b  insns=5  ret=0  ebp+[]  ebp-0..  regs=-
+  1724b  push                 ebp
+  1724c  mov                  ebp, esp
+  1724e  mov                  eax, 1
+  17253  pop                  ebp
+  17254  ret                  
+==================================================================
+AGetTime  RVA=0x173c7  insns=105  ret=4  ebp+['0x8']  ebp-12..  regs=-
+  173c7  push                 ebp
+  173c8  mov                  ebp, esp
+  173ca  sub                  esp, 0xc
+  173cd  movsx                eax, word ptr [0x100823f8]
+  173d4  cmp                  eax, 1
+  173d7  jne                  0x100173e3
+  173d9  mov                  eax, dword ptr [0x10096e00]
+  173de  jmp                  0x10017561  ; internal 0x17561
+  173e3  cmp                  dword ptr [0x10096d08], 0
+  173ea  jle                  0x100174db
+  173f0  cmp                  dword ptr [0x10096d00], 0
+  173f7  jne                  0x100174db
+==================================================================
+ASetFader  RVA=0x17567  insns=41  ret=8  ebp+['0xc']  ebp-0..  regs=-
+  17567  push                 ebp
+  17568  mov                  ebp, esp
+  1756a  cmp                  dword ptr [ebp + 0xc], 0xa
+  1756e  jge                  0x1001757c
+  17570  mov                  dword ptr [0x10096df4], 0
+  1757a  jmp                  0x100175b3  ; internal 0x175b3
+  1757c  cmp                  dword ptr [ebp + 0xc], 0x7530
+  17583  jge                  0x100175a9
+  17585  mov                  eax, dword ptr [ebp + 0xc]
+  17588  imul                 eax, eax, 0xffffd8f0
+  1758e  cdq                  
+  1758f  mov                  ecx, 6
+==================================================================
+AStart  RVA=0x17603  insns=10  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  17603  push                 ebp
+  17604  mov                  ebp, esp
+  17606  mov                  dword ptr [0x10082bec], 0
+  17610  mov                  dword ptr [0x10096d88], 2
+  1761a  mov                  eax, dword ptr [ebp + 8]
+  1761d  mov                  dword ptr [0x100829f0], eax
+  17622  call                 0x100144c9  ; internal 0x144c9
+  17627  movsx                eax, word ptr [0x10096de0]
+  1762e  pop                  ebp
+  1762f  ret                  4
+==================================================================
+ASetPfad  RVA=0x1773e  insns=10  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  1773e  push                 ebp
+  1773f  mov                  ebp, esp
+  17741  mov                  eax, dword ptr [ebp + 8]
+  17744  push                 eax
+  17745  push                 0x100835e0
+  1774a  call                 dword ptr [0x100430f0]  ; KERNEL32.dll!lstrcpyA
+  17750  call                 0x10014233  ; internal 0x14233
+  17755  xor                  eax, eax
+  17757  pop                  ebp
+  17758  ret                  4
+==================================================================
+APlay  RVA=0x1775b  insns=89  ret=0x30  ebp+['0x8', '0xc', '0x10', '0x14', '0x18', '0x1c', '0x20', '0x24', '0x28', '0x2c', '0x30', '0x34']  ebp-8..  regs=-
+  1775b  push                 ebp
+  1775c  mov                  ebp, esp
+  1775e  sub                  esp, 8
+  17761  mov                  eax, dword ptr [ebp + 0x28]
+  17764  and                  al, 0xfc
+  17766  mov                  dword ptr [ebp + 0x28], eax
+  17769  mov                  ecx, dword ptr [ebp + 0x2c]
+  1776c  and                  ecx, 0xfffffffc
+  1776f  mov                  dword ptr [ebp + 0x2c], ecx
+  17772  mov                  edx, dword ptr [ebp + 0x30]
+  17775  and                  edx, 0xfffffffc
+  17778  mov                  dword ptr [ebp + 0x30], edx
+==================================================================
+ABilder  RVA=0x17883  insns=19  ret=0x1c  ebp+['0x8', '0xc', '0x10', '0x14', '0x18', '0x1c', '0x20']  ebp-0..  regs=-
+  17883  push                 ebp
+  17884  mov                  ebp, esp
+  17886  mov                  eax, dword ptr [ebp + 8]
+  17889  mov                  dword ptr [0x1008bab8], eax
+  1788e  mov                  ecx, dword ptr [ebp + 0xc]
+  17891  mov                  dword ptr [0x1008babc], ecx
+  17897  mov                  edx, dword ptr [ebp + 0x10]
+  1789a  mov                  dword ptr [0x10082b0c], edx
+  178a0  mov                  eax, dword ptr [ebp + 0x14]
+  178a3  mov                  dword ptr [0x1006680c], eax
+  178a8  mov                  ecx, dword ptr [ebp + 0x18]
+  178ab  mov                  dword ptr [0x100950fc], ecx
+==================================================================
+ABildpos  RVA=0x178c8  insns=5  ret=4  ebp+[]  ebp-0..  regs=-
+  178c8  push                 ebp
+  178c9  mov                  ebp, esp
+  178cb  mov                  eax, dword ptr [0x1008e354]
+  178d0  pop                  ebp
+  178d1  ret                  4
+==================================================================
+AExit  RVA=0x179dd  insns=9  ret=0  ebp+[]  ebp-0..  regs=-
+  179dd  push                 ebp
+  179de  mov                  ebp, esp
+  179e0  mov                  dword ptr [0x100826c0], 1
+  179ea  mov                  eax, dword ptr [0x10093a84]
+  179ef  push                 eax
+  179f0  call                 dword ptr [0x10043140]  ; KERNEL32.dll!SetEvent
+  179f6  mov                  eax, 1
+  179fb  pop                  ebp
+  179fc  ret                  
+==================================================================
+RWavePlay  RVA=0x17b86  insns=5  ret=0  ebp+[]  ebp-0..  regs=-
+  17b86  push                 ebp
+  17b87  mov                  ebp, esp
+  17b89  movsx                eax, word ptr [0x10096de0]
+  17b90  pop                  ebp
+  17b91  ret                  
+==================================================================
+RWaveStop  RVA=0x17bc8  insns=31  ret=0  ebp+[]  ebp-0..  regs=-
+  17bc8  push                 ebp
+  17bc9  mov                  ebp, esp
+  17bcb  cmp                  dword ptr [0x10096cc8], 0
+  17bd2  jne                  0x10017bd8
+  17bd4  xor                  eax, eax
+  17bd6  jmp                  0x10017c48  ; internal 0x17c48
+  17bd8  cmp                  dword ptr [0x100825c0], 1
+  17bdf  jne                  0x10017c43
+  17be1  push                 0x10082718
+  17be6  call                 dword ptr [0x10043124]  ; KERNEL32.dll!EnterCriticalSection
+  17bec  mov                  eax, dword ptr [0x100825f4]
+  17bf1  push                 eax
+==================================================================
+RWaveParam  RVA=0x17c4a  insns=37  ret=8  ebp+['0x8', '0xc']  ebp-8..  regs=-
+  17c4a  push                 ebp
+  17c4b  mov                  ebp, esp
+  17c4d  sub                  esp, 8
+  17c50  mov                  eax, dword ptr [ebp + 8]
+  17c53  mov                  ecx, dword ptr [ebp + 0xc]
+  17c56  mov                  dword ptr [eax*4 + 0x10082b1c], ecx
+  17c5d  cmp                  dword ptr [ebp + 8], 0x3c
+  17c61  jl                   0x10017cc3
+  17c63  cmp                  dword ptr [ebp + 8], 0x81
+  17c6a  jge                  0x10017cc3
+  17c6c  fild                 dword ptr [ebp + 0xc]
+  17c6f  fst                  qword ptr [ebp - 8]
+==================================================================
+RGetParam  RVA=0x17cd0  insns=6  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  17cd0  push                 ebp
+  17cd1  mov                  ebp, esp
+  17cd3  mov                  eax, dword ptr [ebp + 8]
+  17cd6  mov                  eax, dword ptr [eax*4 + 0x1008b774]
+  17cdd  pop                  ebp
+  17cde  ret                  4
+==================================================================
+RWaveGetTime  RVA=0x17ce1  insns=17  ret=0  ebp+[]  ebp-4..  regs=ecx
+  17ce1  push                 ebp
+  17ce2  mov                  ebp, esp
+  17ce4  push                 ecx
+  17ce5  cmp                  dword ptr [0x10083524], -1
+  17cec  je                   0x10017cfd
+  17cee  call                 0x100186eb  ; internal 0x186eb
+  17cf3  mov                  eax, dword ptr [0x10082954]
+  17cf8  mov                  dword ptr [ebp - 4], eax
+  17cfb  jmp                  0x10017d04  ; internal 0x17d04
+  17cfd  mov                  dword ptr [ebp - 4], 0
+  17d04  mov                  eax, dword ptr [ebp - 4]
+  17d07  cdq                  
+==================================================================
+RWaveSave  RVA=0x17d10  insns=7  ret=0  ebp+[]  ebp-0..  regs=ecx
+  17d10  push                 ebp
+  17d11  mov                  ebp, esp
+  17d13  push                 ecx
+  17d14  mov                  eax, 1
+  17d19  mov                  esp, ebp
+  17d1b  pop                  ebp
+  17d1c  ret                  
+==================================================================
+RWaveFilter  RVA=0x17d1d  insns=5  ret=4  ebp+[]  ebp-0..  regs=-
+  17d1d  push                 ebp
+  17d1e  mov                  ebp, esp
+  17d20  mov                  eax, 1
+  17d25  pop                  ebp
+  17d26  ret                  4
+==================================================================
+RWaveTakt  RVA=0x17d29  insns=5  ret=0  ebp+[]  ebp-0..  regs=-
+  17d29  push                 ebp
+  17d2a  mov                  ebp, esp
+  17d2c  mov                  eax, 1
+  17d31  pop                  ebp
+  17d32  ret                  
+==================================================================
+AVbInfoCall  RVA=0x17d3d  insns=5  ret=4  ebp+[]  ebp-0..  regs=-
+  17d3d  push                 ebp
+  17d3e  mov                  ebp, esp
+  17d40  mov                  eax, 1
+  17d45  pop                  ebp
+  17d46  ret                  4
+==================================================================
+RWaveGetInfo  RVA=0x1844f  insns=5  ret=4  ebp+[]  ebp-0..  regs=eax
+  1844f  push                 ebp
+  18450  mov                  ebp, esp
+  18452  xor                  eax, eax
+  18454  pop                  ebp
+  18455  ret                  4
+==================================================================
+RWaveSetInfo  RVA=0x18458  insns=5  ret=4  ebp+[]  ebp-0..  regs=-
+  18458  push                 ebp
+  18459  mov                  ebp, esp
+  1845b  mov                  eax, 1
+  18460  pop                  ebp
+  18461  ret                  4
+==================================================================
+RWaveRec  RVA=0x18464  insns=5  ret=4  ebp+[]  ebp-0..  regs=-
+  18464  push                 ebp
+  18465  mov                  ebp, esp
+  18467  movsx                eax, word ptr [0x10096de0]
+  1846e  pop                  ebp
+  1846f  ret                  4
+==================================================================
+RMenu  RVA=0x184b8  insns=5  ret=0  ebp+[]  ebp-0..  regs=-
+  184b8  push                 ebp
+  184b9  mov                  ebp, esp
+  184bb  mov                  eax, 1
+  184c0  pop                  ebp
+  184c1  ret                  
+==================================================================
+RRecoSave  RVA=0x184c2  insns=9  ret=4  ebp+[]  ebp-0..  regs=-
+  184c2  push                 ebp
+  184c3  mov                  ebp, esp
+  184c5  cmp                  dword ptr [0x1008b83c], 1
+  184cc  jne                  0x100184d5
+  184ce  push                 0
+  184d0  call                 0x1001865b  ; internal 0x1865b
+  184d5  movsx                eax, word ptr [0x10096d7e]
+  184dc  pop                  ebp
+  184dd  ret                  4
+==================================================================
+RWavePause1  RVA=0x184e9  insns=43  ret=0  ebp+[]  ebp-4..  regs=ecx
+  184e9  push                 ebp
+  184ea  mov                  ebp, esp
+  184ec  push                 ecx
+  184ed  movsx                eax, word ptr [0x10096d50]
+  184f4  test                 eax, eax
+  184f6  je                   0x10018583
+  184fc  mov                  dword ptr [ebp - 4], 1
+  18503  jmp                  0x1001850e  ; internal 0x1850e
+  18505  mov                  ecx, dword ptr [ebp - 4]
+  18508  add                  ecx, 1
+  1850b  mov                  dword ptr [ebp - 4], ecx
+  1850e  cmp                  dword ptr [ebp - 4], 0x1c
+==================================================================
+RWavePause2  RVA=0x1858c  insns=46  ret=0  ebp+[]  ebp-4..  regs=ecx
+  1858c  push                 ebp
+  1858d  mov                  ebp, esp
+  1858f  push                 ecx
+  18590  movsx                eax, word ptr [0x10096d50]
+  18597  test                 eax, eax
+  18599  je                   0x1001862f
+  1859f  mov                  dword ptr [ebp - 4], 1
+  185a6  jmp                  0x100185b1  ; internal 0x185b1
+  185a8  mov                  ecx, dword ptr [ebp - 4]
+  185ab  add                  ecx, 1
+  185ae  mov                  dword ptr [ebp - 4], ecx
+  185b1  cmp                  dword ptr [ebp - 4], 0x1c
+==================================================================
+RTimer  RVA=0x18638  insns=10  ret=0  ebp+[]  ebp-0..  regs=-
+  18638  push                 ebp
+  18639  mov                  ebp, esp
+  1863b  cmp                  dword ptr [0x10096cc8], 0
+  18642  jne                  0x1001864d
+  18644  movsx                eax, word ptr [0x10096de0]
+  1864b  jmp                  0x10018659  ; internal 0x18659
+  1864d  call                 0x10015666  ; internal 0x15666
+  18652  movsx                eax, word ptr [0x10096de0]
+  18659  pop                  ebp
+  1865a  ret                  
+==================================================================
+AMemory  RVA=0x18697  insns=24  ret=0  ebp+[]  ebp-32..  regs=-
+  18697  push                 ebp
+  18698  mov                  ebp, esp
+  1869a  sub                  esp, 0x20
+  1869d  push                 0x20
+  1869f  push                 0
+  186a1  lea                  eax, [ebp - 0x20]
+  186a4  push                 eax
+  186a5  call                 0x10031910  ; internal 0x31910
+  186aa  add                  esp, 0xc
+  186ad  mov                  dword ptr [ebp - 0x20], 0x20
+  186b4  lea                  ecx, [ebp - 0x20]
+  186b7  push                 ecx
+==================================================================
+ADSoff  RVA=0x18706  insns=6  ret=0  ebp+[]  ebp-0..  regs=-
+  18706  push                 ebp
+  18707  mov                  ebp, esp
+  18709  call                 0x1001b3a1  ; DCloseAll
+  1870e  mov                  eax, 1
+  18713  pop                  ebp
+  18714  ret                  
+==================================================================
+AGetInput  RVA=0x19023  insns=150  ret=0  ebp+[]  ebp-248..  regs=-
+  19023  push                 ebp
+  19024  mov                  ebp, esp
+  19026  sub                  esp, 0xf8
+  1902c  cmp                  dword ptr [0x100826bc], 0
+  19033  jne                  0x1001903f
+  19035  mov                  eax, 1
+  1903a  jmp                  0x1001929c  ; internal 0x1929c
+  1903f  mov                  dword ptr [ebp - 0xdc], 0xa8
+  19049  mov                  dword ptr [ebp - 0xc4], 7
+  19053  push                 3
+  19055  lea                  eax, [ebp - 0xdc]
+  1905b  push                 eax
+==================================================================
+ASelectMic  RVA=0x192a0  insns=177  ret=0  ebp+[]  ebp-252..  regs=eax
+  192a0  push                 ebp
+  192a1  mov                  ebp, esp
+  192a3  sub                  esp, 0xfc
+  192a9  xor                  eax, eax
+  192ab  jmp                  0x1001959b  ; internal 0x1959b
+  192b0  mov                  edx, dword ptr [ebp - 0xe8]
+  192b6  add                  edx, 1
+  192b9  mov                  dword ptr [ebp - 0xe8], edx
+  192bf  mov                  eax, dword ptr [ebp - 0xe8]
+  192c5  cmp                  eax, dword ptr [ebp - 0xc0]
+  192cb  jae                  0x100192f3
+  192cd  mov                  ecx, dword ptr [ebp - 0xe8]
+==================================================================
+RWaveTransfer  RVA=0x1959f  insns=17  ret=4  ebp+[]  ebp-4..  regs=ecx
+  1959f  push                 ebp
+  195a0  mov                  ebp, esp
+  195a2  push                 ecx
+  195a3  cmp                  dword ptr [0x10096cc8], 0
+  195aa  jne                  0x100195b0
+  195ac  xor                  eax, eax
+  195ae  jmp                  0x100195d1  ; internal 0x195d1
+  195b0  push                 0x10082730
+  195b5  call                 dword ptr [0x10043124]  ; KERNEL32.dll!EnterCriticalSection
+  195bb  call                 0x10018448  ; internal 0x18448
+  195c0  mov                  dword ptr [ebp - 4], eax
+  195c3  push                 0x10082730
+==================================================================
+AWelle  RVA=0x195d7  insns=117  ret=0xc  ebp+['0x8', '0xc', '0x10']  ebp-52..  regs=-
+  195d7  push                 ebp
+  195d8  mov                  ebp, esp
+  195da  sub                  esp, 0x34
+  195dd  mov                  eax, dword ptr [ebp + 0x10]
+  195e0  mov                  dword ptr [ebp - 0x1c], eax
+  195e3  push                 0
+  195e5  push                 0
+  195e7  push                 3
+  195e9  push                 0
+  195eb  push                 1
+  195ed  push                 0x80000000
+  195f2  mov                  ecx, dword ptr [ebp + 8]
+==================================================================
+AWellePos  RVA=0x1973c  insns=5  ret=4  ebp+[]  ebp-0..  regs=eax
+  1973c  push                 ebp
+  1973d  mov                  ebp, esp
+  1973f  xor                  eax, eax
+  19741  pop                  ebp
+  19742  ret                  4
+==================================================================
+ALoad  RVA=0x1974a  insns=315  ret=0,4  ebp+['0x8']  ebp-184..  regs=ecx
+  1974a  push                 ebp
+  1974b  mov                  ebp, esp
+  1974d  push                 -1
+  1974f  push                 0x10040d20
+  19754  mov                  eax, dword ptr fs:[0]
+  1975a  push                 eax
+  1975b  mov                  dword ptr fs:[0], esp
+  19762  push                 ecx
+  19763  sub                  esp, 0xa8
+  19769  push                 ebx
+  1976a  push                 esi
+  1976b  push                 edi
+==================================================================
+AClose  RVA=0x19cb1  insns=42  ret=4  ebp+['0x8']  ebp-4..  regs=ecx
+  19cb1  push                 ebp
+  19cb2  mov                  ebp, esp
+  19cb4  push                 ecx
+  19cb5  mov                  word ptr [ebp - 4], 0
+  19cbb  jmp                  0x10019cc9  ; internal 0x19cc9
+  19cbd  mov                  ax, word ptr [ebp - 4]
+  19cc1  add                  ax, 1
+  19cc5  mov                  word ptr [ebp - 4], ax
+  19cc9  movsx                ecx, word ptr [ebp - 4]
+  19ccd  cmp                  ecx, 0xc8
+  19cd3  jge                  0x10019d53
+  19cd5  movsx                edx, word ptr [ebp - 4]
+==================================================================
+ACloseAll  RVA=0x19d5e  insns=36  ret=0  ebp+[]  ebp-4..  regs=ecx
+  19d5e  push                 ebp
+  19d5f  mov                  ebp, esp
+  19d61  push                 ecx
+  19d62  mov                  word ptr [ebp - 4], 0
+  19d68  jmp                  0x10019d76  ; internal 0x19d76
+  19d6a  mov                  ax, word ptr [ebp - 4]
+  19d6e  add                  ax, 1
+  19d72  mov                  word ptr [ebp - 4], ax
+  19d76  movsx                ecx, word ptr [ebp - 4]
+  19d7a  cmp                  ecx, 0xc8
+  19d80  jge                  0x10019de5
+  19d82  movsx                edx, word ptr [ebp - 4]
+==================================================================
+RWaveLaden  RVA=0x1a152  insns=149  ret=0x14  ebp+['0x8', '0xc', '0x10', '0x14', '0x18']  ebp-0..  regs=-
+  1a152  push                 ebp
+  1a153  mov                  ebp, esp
+  1a155  cmp                  dword ptr [0x10096cc8], 0
+  1a15c  jne                  0x1001a165
+  1a15e  xor                  eax, eax
+  1a160  jmp                  0x1001a3fb  ; internal 0x1a3fb
+  1a165  push                 0x10082718
+  1a16a  call                 dword ptr [0x10043124]  ; KERNEL32.dll!EnterCriticalSection
+  1a170  push                 4
+  1a172  call                 0x1001b0ff  ; internal 0x1b0ff
+  1a177  add                  esp, 4
+  1a17a  cmp                  dword ptr [0x100825c0], 1
+==================================================================
+DStart  RVA=0x1acda  insns=243  ret=4  ebp+['0x8']  ebp-8..  regs=-
+  1acda  push                 ebp
+  1acdb  mov                  ebp, esp
+  1acdd  sub                  esp, 8
+  1ace0  cmp                  dword ptr [0x10096d00], 0
+  1ace7  je                   0x1001acf5
+  1ace9  movsx                eax, word ptr [0x10096de0]
+  1acf0  jmp                  0x1001b0f9  ; internal 0x1b0f9
+  1acf5  movsx                eax, word ptr [0x10096d50]
+  1acfc  test                 eax, eax
+  1acfe  jne                  0x1001b03f
+  1ad04  movsx                ecx, word ptr [0x10096d52]
+  1ad0b  mov                  dword ptr [ebp - 4], ecx
+==================================================================
+DCloseAll  RVA=0x1b3a1  insns=45  ret=0  ebp+[]  ebp-0..  regs=-
+  1b3a1  push                 ebp
+  1b3a2  mov                  ebp, esp
+  1b3a4  movsx                eax, word ptr [0x10096d50]
+  1b3ab  cmp                  eax, 1
+  1b3ae  je                   0x1001b3ba
+  1b3b0  mov                  eax, 1
+  1b3b5  jmp                  0x1001b462  ; internal 0x1b462
+  1b3ba  cmp                  dword ptr [0x10096cc8], 0
+  1b3c1  jne                  0x1001b3ca
+  1b3c3  xor                  eax, eax
+  1b3c5  jmp                  0x1001b462  ; internal 0x1b462
+  1b3ca  push                 0x10082718
+==================================================================
+ASetPitch  RVA=0x1be5c  insns=56  ret=4  ebp+['0x8']  ebp-4..  regs=ecx
+  1be5c  push                 ebp
+  1be5d  mov                  ebp, esp
+  1be5f  push                 ecx
+  1be60  mov                  dword ptr [ebp - 4], 1
+  1be67  jmp                  0x1001be72  ; internal 0x1be72
+  1be69  mov                  eax, dword ptr [ebp - 4]
+  1be6c  add                  eax, 1
+  1be6f  mov                  dword ptr [ebp - 4], eax
+  1be72  cmp                  dword ptr [ebp - 4], 0x1c
+  1be76  jg                   0x1001bf35
+  1be7c  mov                  ecx, dword ptr [ebp + 8]
+  1be7f  add                  ecx, 0x93a8
+==================================================================
+DGetZeit  RVA=0x1c1bd  insns=53  ret=4  ebp+['0x8']  ebp-8..  regs=-
+  1c1bd  push                 ebp
+  1c1be  mov                  ebp, esp
+  1c1c0  sub                  esp, 8
+  1c1c3  mov                  eax, dword ptr [0x10096cbc]
+  1c1c8  mov                  dword ptr [0x10093fac], eax
+  1c1cd  movsx                ecx, word ptr [0x10096d50]
+  1c1d4  cmp                  ecx, 1
+  1c1d7  je                   0x1001c1e0
+  1c1d9  xor                  eax, eax
+  1c1db  jmp                  0x1001c272  ; internal 0x1c272
+  1c1e0  cmp                  dword ptr [0x10096cc8], 0
+  1c1e7  jne                  0x1001c1f0
+==================================================================
+DPlayFileClose  RVA=0x1c278  insns=55  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  1c278  push                 ebp
+  1c279  mov                  ebp, esp
+  1c27b  movsx                eax, word ptr [0x10096d50]
+  1c282  cmp                  eax, 1
+  1c285  je                   0x1001c291
+  1c287  mov                  eax, 1
+  1c28c  jmp                  0x1001c36f  ; internal 0x1c36f
+  1c291  cmp                  dword ptr [0x10096cc8], 0
+  1c298  jne                  0x1001c2a1
+  1c29a  xor                  eax, eax
+  1c29c  jmp                  0x1001c36f  ; internal 0x1c36f
+  1c2a1  mov                  ecx, dword ptr [ebp + 8]
+==================================================================
+DPlayFileCheck  RVA=0x1c44b  insns=23  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  1c44b  push                 ebp
+  1c44c  mov                  ebp, esp
+  1c44e  mov                  eax, dword ptr [ebp + 8]
+  1c451  imul                 eax, eax, 0xa0
+  1c457  cmp                  dword ptr [eax + 0x10093f38], 0
+  1c45e  jne                  0x1001c464
+  1c460  xor                  eax, eax
+  1c462  jmp                  0x1001c496  ; internal 0x1c496
+  1c464  mov                  ecx, dword ptr [ebp + 8]
+  1c467  push                 ecx
+  1c468  call                 0x1001c1bd  ; DGetZeit
+  1c46d  mov                  edx, dword ptr [ebp + 8]
+==================================================================
+DPlayFile  RVA=0x1c49a  insns=218  ret=0xc  ebp+['0x8', '0xc', '0x10']  ebp-32..  regs=-
+  1c49a  push                 ebp
+  1c49b  mov                  ebp, esp
+  1c49d  sub                  esp, 0x20
+  1c4a0  cmp                  dword ptr [0x10096cc8], 0
+  1c4a7  jne                  0x1001c4b0
+  1c4a9  xor                  eax, eax
+  1c4ab  jmp                  0x1001c7a6  ; internal 0x1c7a6
+  1c4b0  movsx                eax, word ptr [0x100823f8]
+  1c4b7  cmp                  eax, 1
+  1c4ba  jne                  0x1001c4c6
+  1c4bc  mov                  eax, 1
+  1c4c1  jmp                  0x1001c7a6  ; internal 0x1c7a6
+==================================================================
+DPlayUpdate  RVA=0x1de49  insns=52  ret=0  ebp+[]  ebp-8..  regs=-
+  1de49  push                 ebp
+  1de4a  mov                  ebp, esp
+  1de4c  sub                  esp, 8
+  1de4f  mov                  dword ptr [ebp - 8], 0
+  1de56  cmp                  dword ptr [0x10096cc8], 0
+  1de5d  jne                  0x1001de66
+  1de5f  xor                  eax, eax
+  1de61  jmp                  0x1001df0b  ; internal 0x1df0b
+  1de66  movsx                eax, word ptr [0x100823f8]
+  1de6d  cmp                  eax, 1
+  1de70  jne                  0x1001de7c
+  1de72  mov                  eax, 1
+==================================================================
+APos  RVA=0x1df0f  insns=7  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  1df0f  push                 ebp
+  1df10  mov                  ebp, esp
+  1df12  mov                  eax, dword ptr [ebp + 8]
+  1df15  mov                  dword ptr [0x1008bbd8], eax
+  1df1a  mov                  eax, 1
+  1df1f  pop                  ebp
+  1df20  ret                  4
+==================================================================
+ATest  RVA=0x1df23  insns=5  ret=8  ebp+[]  ebp-0..  regs=-
+  1df23  push                 ebp
+  1df24  mov                  ebp, esp
+  1df26  mov                  eax, 1
+  1df2b  pop                  ebp
+  1df2c  ret                  8
+==================================================================
+REffekt  RVA=0x1e73f  insns=450  ret=8  ebp+['0x8', '0xc']  ebp-0..  regs=-
+  1e73f  push                 ebp
+  1e740  mov                  ebp, esp
+  1e742  push                 0x1004b620
+  1e747  mov                  eax, dword ptr [ebp + 8]
+  1e74a  push                 eax
+  1e74b  call                 dword ptr [0x10043038]  ; KERNEL32.dll!lstrcmpiA
+  1e751  test                 eax, eax
+  1e753  jne                  0x1001e75f
+  1e755  mov                  eax, dword ptr [0x10096cb4]
+  1e75a  jmp                  0x1001ee36  ; internal 0x1ee36
+  1e75f  push                 0x1004b630
+  1e764  mov                  ecx, dword ptr [ebp + 8]
+==================================================================
+RDrum  RVA=0x1ee3a  insns=560  ret=0xc  ebp+['0x8', '0xc', '0x10']  ebp-24..  regs=-
+  1ee3a  push                 ebp
+  1ee3b  mov                  ebp, esp
+  1ee3d  sub                  esp, 0x18
+  1ee40  mov                  dword ptr [ebp - 0x10], 0
+  1ee47  push                 0x1004b804
+  1ee4c  mov                  eax, dword ptr [ebp + 8]
+  1ee4f  push                 eax
+  1ee50  call                 dword ptr [0x10043038]  ; KERNEL32.dll!lstrcmpiA
+  1ee56  test                 eax, eax
+  1ee58  jne                  0x1001ee68
+  1ee5a  mov                  ecx, dword ptr [ebp + 0xc]
+  1ee5d  mov                  dword ptr [0x1008f770], ecx
+==================================================================
+RpDrum  RVA=0x1f78c  insns=11  ret=0xc  ebp+['0x8', '0xc', '0x10']  ebp-0..  regs=-
+  1f78c  push                 ebp
+  1f78d  mov                  ebp, esp
+  1f78f  mov                  eax, dword ptr [ebp + 0x10]
+  1f792  push                 eax
+  1f793  mov                  ecx, dword ptr [ebp + 0xc]
+  1f796  push                 ecx
+  1f797  mov                  edx, dword ptr [ebp + 8]
+  1f79a  push                 edx
+  1f79b  call                 0x1001ee3a  ; RDrum
+  1f7a0  pop                  ebp
+  1f7a1  ret                  0xc
+==================================================================
+RWavToTemp  RVA=0x20290  insns=912  ret=0x1c  ebp+['0x8', '0xc', '0x10', '0x14', '0x18', '0x1c', '0x20']  ebp-876..  regs=-
+  20290  push                 ebp
+  20291  mov                  ebp, esp
+  20293  sub                  esp, 0x36c
+  20299  mov                  dword ptr [ebp - 0x364], 0x12770
+  202a3  cmp                  dword ptr [0x10096cc8], 0
+  202aa  jne                  0x100202b3
+  202ac  xor                  eax, eax
+  202ae  jmp                  0x1002126c  ; internal 0x2126c
+  202b3  cmp                  dword ptr [ebp + 8], 0
+  202b7  jne                  0x100202c0
+  202b9  xor                  eax, eax
+  202bb  jmp                  0x1002126c  ; internal 0x2126c
+==================================================================
+ASetCur  RVA=0x2177d  insns=24  ret=4  ebp+['0x8']  ebp-0..  regs=-
+  2177d  push                 ebp
+  2177e  mov                  ebp, esp
+  21780  cmp                  dword ptr [ebp + 8], 0
+  21784  jne                  0x100217b4
+  21786  cmp                  dword ptr [0x10096d0c], 0
+  2178d  jne                  0x100217b2
+  2178f  push                 0x7f8a
+  21794  push                 0
+  21796  call                 dword ptr [0x10043204]  ; USER32.dll!LoadCursorA
+  2179c  mov                  dword ptr [0x10096d0c], eax
+  217a1  mov                  eax, dword ptr [0x10096d0c]
+  217a6  push                 eax
+==================================================================
+Debimem  RVA=0x217dd  insns=47  ret=4  ebp+['0x8']  ebp-36..  regs=-
+  217dd  push                 ebp
+  217de  mov                  ebp, esp
+  217e0  sub                  esp, 0x24
+  217e3  push                 0x20
+  217e5  push                 0
+  217e7  lea                  eax, [ebp - 0x24]
+  217ea  push                 eax
+  217eb  call                 0x10031910  ; internal 0x31910
+  217f0  add                  esp, 0xc
+  217f3  mov                  dword ptr [ebp - 0x24], 0x20
+  217fa  lea                  ecx, [ebp - 0x24]
+  217fd  push                 ecx
+==================================================================
+PInit  RVA=0x22318  insns=12  ret=0  ebp+[]  ebp-0..  regs=-
+  22318  push                 ebp
+  22319  mov                  ebp, esp
+  2231b  push                 0
+  2231d  call                 0x10012aea  ; ADevice
+  22322  push                 0
+  22324  call                 0x1001149f  ; AInit
+  22329  push                 0x7d00
+  2232e  push                 0x3c
+  22330  call                 0x10017c4a  ; RWaveParam
+  22335  xor                  eax, eax
+  22337  pop                  ebp
+  22338  ret                  
+==================================================================
+PClose  RVA=0x22339  insns=7  ret=0  ebp+[]  ebp-0..  regs=-
+  22339  push                 ebp
+  2233a  mov                  ebp, esp
+  2233c  call                 0x10014516  ; AStop
+  22341  call                 0x1001710e  ; AEnd
+  22346  xor                  eax, eax
+  22348  pop                  ebp
+  22349  ret                  
+==================================================================
+PStart  RVA=0x2234a  insns=10  ret=0  ebp+[]  ebp-0..  regs=-
+  2234a  push                 ebp
+  2234b  mov                  ebp, esp
+  2234d  push                 0xa80f570
+  22352  call                 0x10017603  ; AStart
+  22357  push                 1
+  22359  push                 0x32
+  2235b  call                 0x10017c4a  ; RWaveParam
+  22360  xor                  eax, eax
+  22362  pop                  ebp
+  22363  ret                  
+==================================================================
+PStop  RVA=0x22364  insns=6  ret=0  ebp+[]  ebp-0..  regs=-
+  22364  push                 ebp
+  22365  mov                  ebp, esp
+  22367  call                 0x10014516  ; AStop
+  2236c  xor                  eax, eax
+  2236e  pop                  ebp
+  2236f  ret                  
+==================================================================
+PPlay  RVA=0x22370  insns=24  ret=0x18  ebp+['0x8', '0xc', '0x10', '0x14', '0x18', '0x1c']  ebp-0..  regs=-
+  22370  push                 ebp
+  22371  mov                  ebp, esp
+  22373  mov                  eax, dword ptr [ebp + 0x1c]
+  22376  push                 eax
+  22377  mov                  ecx, dword ptr [ebp + 0x18]
+  2237a  push                 ecx
+  2237b  mov                  edx, dword ptr [ebp + 0x14]
+  2237e  push                 edx
+  2237f  mov                  eax, dword ptr [ebp + 0x10]
+  22382  push                 eax
+  22383  mov                  ecx, dword ptr [ebp + 0xc]
+  22386  push                 ecx
+==================================================================
+Stretcher  RVA=0x223a5  insns=55  ret=0,0x10  ebp+['0x8', '0xc', '0x10', '0x14']  ebp-28..  regs=ecx
+  223a5  push                 ebp
+  223a6  mov                  ebp, esp
+  223a8  push                 -1
+  223aa  push                 0x10040d66
+  223af  mov                  eax, dword ptr fs:[0]
+  223b5  push                 eax
+  223b6  mov                  dword ptr fs:[0], esp
+  223bd  push                 ecx
+  223be  sub                  esp, 0xc
+  223c1  push                 ebx
+  223c2  push                 esi
+  223c3  push                 edi
+==================================================================
+ARegUnIn  RVA=0x22460  insns=52  ret=8  ebp+['0x8', '0xc']  ebp-12..  regs=-
+  22460  push                 ebp
+  22461  mov                  ebp, esp
+  22463  sub                  esp, 0xc
+  22466  mov                  dword ptr [ebp - 4], 0
+  2246d  lea                  eax, [ebp - 8]
+  22470  push                 eax
+  22471  lea                  ecx, [ebp - 4]
+  22474  push                 ecx
+  22475  push                 0
+  22477  push                 0xf003f
+  2247c  push                 0
+  2247e  push                 0x1004baa0
+==================================================================
+ARegDelete  RVA=0x224fb  insns=8  ret=0  ebp+[]  ebp-0..  regs=-
+  224fb  push                 ebp
+  224fc  mov                  ebp, esp
+  224fe  push                 0x1004bb00
+  22503  push                 0x80000002
+  22508  call                 dword ptr [0x10043000]  ; ADVAPI32.dll!RegDeleteKeyA
+  2250e  mov                  eax, 1
+  22513  pop                  ebp
+  22514  ret                  

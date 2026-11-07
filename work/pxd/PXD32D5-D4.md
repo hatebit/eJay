@@ -1,0 +1,299 @@
+# PXD32D5.DLL (build D4) — master analysis
+
+Static analysis only: the file on disk was parsed. Nothing was loaded, executed, registered or modified.
+
+**Subject:** `pxd32d5_d4.dll` — 348,160 bytes (not checked in), PE32
+x86, image base
+`0x10000000`, link stamp 2001-07-26 09:43:32 UTC, **96 named exports**.
+
+**Document set** (this file is the index and the export/convention reference):
+
+| File | Contents |
+|---|---|
+| `PXD32D5-D4.md` | *this file* — file facts, full export table, calling conventions and arity per export, method |
+| `PXD32D5-D4-engine.md` | what the engine does: DirectSound bring-up, voice/event model, transport and worker thread, sample slots, recording, conversion, registry, confidence table |
+| `PXD32D5-D4-layout.md` | image headers, sections, data directories, runtime globals table, voice/event/sample structures, address→section map |
+| `PXD32D5-D4-strings-imports.md` | identity and application strings, temp-file names, import inventory per DLL, useful negatives |
+| `PXD32D5-D4-worklog.md` | provenance, what was done, **corrections to earlier readings**, open questions with test plans, artifacts, reusable snippets |
+
+## What this DLL is (short version)
+
+`pxd32d5.dll` is the **audio engine of Dance eJay3**, a 2001 German music-software product. It is a
+DirectSound-based sampler/sequencer: the host schedules sample events into per-voice rings, a worker
+thread renders and feeds up to 28 DirectSound buffers, and the same module also owns sample loading
+(with Microsoft `SZDD` decompression), waveform thumbnails as DIB sections, a `waveIn` recording path,
+format conversion, and the product's uninstall registration.
+
+Four independent signals point at the product:
+
+| Evidence | Address | Text |
+|---|---|---|
+| Uninstall key written by `ARegUnIn` | `0x1004BAA4` | `Software\Microsoft\Windows\CurrentVersion\Uninstall\Dance eJay3` |
+| Sample-collection name | `0x1004B218` | `eJay SoundCollection` |
+| Conversion progress strings | `0x1004B160`, `0x1004B1A4` | `PXD2Wav Konvertierung: pxd -> wav`, `WAV2PXD Konvertierung: wav -> pxd (Textinfo)` |
+| DirectSound CLSID / IID used by `DStart` | `0x100434B0`, `0x100434C0` | `{47D4D946-62E8-11CF-93BC-444553540000}` / `{279AFA83-4981-11CE-A521-0020AF0BE560}` |
+
+The build is labelled **D4** here after the file name; the module's internal name is `pxd32d5.dll` and
+the binary itself carries no build tag. Details and per-claim confidence: `PXD32D5-D4-engine.md`.
+
+## File facts
+
+| Property | Value |
+|---|---|
+| File | `pxd32d5_d4.dll` (348,160 bytes) |
+| Format | PE32, x86 / i386 (`machine = 0x014C`) |
+| Sections | 4 — `.text`, `.rdata`, `.data`, `.reloc` |
+| Internal DLL name | `pxd32d5.dll` |
+| PE timestamp | `0x3B5FE644` → 2001-07-26 09:43:32 UTC |
+| Linker | 6.0 (Visual C++ 6.0) |
+| Subsystem | 2 = `WINDOWS_GUI`; OS/image/subsystem version 4.0 / 0.0 / 4.0 |
+| Size of image | `0x9F000` |
+| Entry point | RVA `0x32A3D` → `0x10032A3D` (CRT startup, inside `.text`) |
+| Export ordinal base | 1 |
+| Exports | 96, all by name (no ordinal-only entries, no forwarders); **ordinals are assigned alphabetically** (`ABilder` = 1 … `W2P` = 96) |
+| Characteristics | `0x210E` (EXECUTABLE_IMAGE, 32BIT_MACHINE, LINE_NUMS_STRIPPED, LOCAL_SYMS_STRIPPED) |
+| Stack / heap | reserve `0x100000`, commit `0x1000` each — VC6 defaults |
+
+Because it is a 32-bit x86 image it cannot be loaded into a 64-bit process without a thunking layer.
+
+## Relationship to the 1998 engine
+
+A 1998 sibling build of the same engine shares the German API
+vocabulary (`Welle`, `Dauer`, `Laden`, `Mitte`, `Pegel`, `Laut`) and a large part of the export list, but
+this build is a rewrite, not a recompile:
+
+* 96 exports against 64; new families `D*` (DirectSound: `DStart`, `DCloseAll`, `DPlayFile*`,
+  `DPlayUpdate`, `DGetZeit`), `P*` (`PInit`, `PStart`, `PPlay`, `PStop`, `PClose`), `ALoad`/`AClose`/
+  `ACloseAll`, `REffekt`/`RDrum`/`RpDrum`, `W2P`, `Stretcher`, `Debimem`, `ARegUnIn`/`ARegDelete`.
+* Output moved from MME `waveOut` to **DirectSound obtained through `CoCreateInstance`** — there is no
+  `dsound.dll` import at all, so the device is created at runtime from the CLSID above. **[certain]**
+* `RWaveRec`/`RWaveSave`/`RWaveGetInfo`/`RWaveSetInfo`/`RMenu`/`RWaveFilter`/`RWaveTakt`/
+  `AVbInfoCall`/`Fade`/`RGetName` are **stubs** here: the file writer moved into `AExport`, the popup
+  menu and the Visual Basic hook are gone. See the arity table for the per-export form.
+* `LZ32` appears as a new import (three thunks) and `ALoad` accepts the `SZDD` signature.
+
+## Exported functions and arity (static disassembly)
+
+### Method
+
+Every export was disassembled with Capstone (x86-32) in a linear sweep starting at its RVA. The sweep
+stops at the first terminal instruction (`ret`, `jmp`) that is followed by alignment padding
+(`0xCC`/`0x90`) or by a fresh `55 8B EC` prologue, and always stops at the next export entry point, so
+each listing covers the whole body including early-exit paths but never leaks into the next function.
+
+Three independent signals were then compared:
+
+1. **Epilogue form** — `ret imm16` tells how many bytes the callee pops, i.e. how many dwords the caller
+   must have pushed.
+2. **Frame references** — which positive frame slots `[ebp+8]`, `[ebp+0xC]`, … the body actually reads.
+3. **Call sites** — every `call` from one export to another, with the number of `push`es before it
+   (reported by `_pxd_xref.py`; 20 exports are called from inside the image).
+
+All three agree on all 96 exports: `_pxd_xref.py` reports **0 push-count mismatches**, and the highest
+frame offset equals `4 + ret immediate` wherever an argument is read.
+
+### Findings
+
+* **Every export uses `__stdcall`.** Arguments are pushed by the caller and popped by the callee. Proof
+  from a call site: `PPlay` pushes 12 dwords for `APlay`, while `APlay` ends in `ret 0x30` (48 bytes =
+  12 dwords). `ARecPlay` does the same independently.
+* **No export takes an argument in a register.** No function reads EAX, EDX or ECX before writing it.
+  The idioms that look like register use are not: `push ecx` right after `mov ebp, esp` is local-space
+  allocation, and `xor eax, eax` zeroes a register.
+* **Arguments are never read off ESP.** Zero occurrences of `[esp+N]` in the whole export set; every body
+  sets up `ebp`, so the frame-offset counts are trustworthy.
+* **No argument is loaded with an x87 instruction**, with one exception: `Stretcher` reads its third
+  argument as a `float` (`fld dword ptr [ebp+0x10]` at `0x100223CE`) and compares it against the double
+  `0.1` at `0x10043418`. So exactly one export has a floating-point parameter slot.
+* **Arity histogram:** 0 args ×37, 1 arg ×38, 2 args ×10, 3 args ×5, 4 args ×1, 5 args ×1, 6 args ×1,
+  7 args ×2, 12 args ×1 — 114 dword slots in total.
+* **Fifteen exports pop arguments they never read** (`ADevice`, `ALautGet`, `RGetName`, `ARecDuplex`,
+  `ARecInit`, `ABildpos`, `RWaveFilter`, `AVbInfoCall`, `RWaveGetInfo`, `RWaveSetInfo`, `RWaveRec`,
+  `RRecoSave`, `RWaveTransfer`, `AWellePos`, `ATest`). The arity still comes from `ret N`, because that
+  is what the callee pops and therefore what the caller must push; calling one of them with fewer
+  arguments desynchronises ESP.
+* **Two `ret` forms in one export are MSVC SEH funclets, not a second arity.** `W2P`, `BWaveDauer`,
+  `Stretcher` and `ALoad` contain `mov eax, <handler>; ret` inside their exception frame; the reported
+  arity always comes from the real final `ret imm16`. Example: `BWaveDauer` shows `ret 0` at
+  `0x10012ACC` (the funclet) and `ret 0xC` at `0x10012AE7` (the body).
+* **Export names are undecorated** (`APlay`, not `_APlay@48`), so the names do not encode arity —
+  consistent with a `.DEF`-style export table or a Delphi `exports` clause over `stdcall` functions.
+* **Return values** travel in EAX. A large group returns the `int16` status word at `0x10096DE0`,
+  sign-extended into EAX (`movsx eax, word ptr [0x10096DE0]`), which is the engine's "last error" code;
+  `AGetFree`/`AGetFull` return 64-bit quantities in EDX:EAX instead.
+
+### Table
+
+Arguments are counted in 32-bit dwords as the callee pops them. "Reads [ebp+0x8]" means the body
+actually consumes the slot; "no frame argument read" means the slot is popped but never used, or that
+the function has no arguments at all.
+
+`Ord` is the real export ordinal (base 1) taken from the ordinal table; `#` is the row number, and rows
+are sorted by RVA. The two columns differ, because this build sorts the export *name* table
+alphabetically and the ordinal table follows it: `W2P` is row 1 but ordinal **96**, `ABilder` is
+ordinal **1** at row 42, and only `ASetFader` happens to land on the same number in both columns.
+A host that imports by ordinal therefore does not get the functions in address order.
+
+| # | Ord | Name | RVA | Args | Evidence | What the code does with the arguments |
+|---:|---:|---|---|---:|---|---|
+<!--ARITY-ROWS:BEGIN-->
+| 1 | 96 | `W2P` | `0x100104C6` | 2 | ret 0x8; reads [ebp+0x8]..[ebp+0xc] | 2 dwords, both read: handed to the converter object at 0x100564E0 (setters 0x1000F55D / 0x1000F580 / 0x1000F59D, run 0x1000FB3E). Returns 1. |
+| 2 | 64 | `Extra` | `0x10010682` | 0 | ret (none); no frame argument read | No arguments; builds the 8x8 1-bpp pattern bitmap from the bytes at 0x1004B2B0 and caches bitmap/brush in 0x100829EC / 0x100829F4, guarded by flag 0x10096CCC. |
+| 3 | 22 | `ANummer` | `0x100106CC` | 0 | ret (none); no frame argument read | No arguments; `mov eax, 0x01879487` - a constant outside the image, so a build/host tag rather than a pointer. |
+| 4 | 65 | `ExtraAus` | `0x100106D6` | 0 | ret (none); no frame argument read | No arguments; deletes the brush and the bitmap created by `Extra` (only when flag 0x10096CCC == 1). |
+| 5 | 11 | `AGetFree` | `0x1001070C` | 1 | ret 0x4; reads [ebp+0x8] | (char drive). Computes `arg + 0x41` = drive letter, builds "%c:\", calls GetDriveTypeA + GetDiskFreeSpaceA. Returns free space in EDX:EAX. |
+| 6 | 12 | `AGetFull` | `0x1001084B` | 1 | ret 0x4; reads [ebp+0x8] | (char drive). Same drive-letter handling as `AGetFree`; total space, negative results clamped to 0x3E700000. |
+| 7 | 43 | `ASortOut` | `0x10010A8E` | 0 | ret (none); no frame argument read | No arguments; pre-increments the word cursor at 0x1008E41C and returns `word [0x1009085E + n*2]` (table base 0x10090860 - 2, so the first call returns element 0). |
+| 8 | 45 | `ASortStart` | `0x10010AB2` | 0 | ret (none); no frame argument read | No arguments; qsort (0x100323D4) over the word permutation array at 0x10090860 with comparator 0x10010B74. |
+| 9 | 44 | `ASortStart2` | `0x10010AD5` | 0 | ret (none); no frame argument read | No arguments; the same qsort with the second comparator 0x10010BB6. |
+| 10 | 42 | `ASortInit` | `0x10010AF8` | 0 | ret (none); no frame argument read | No arguments; zeroes the entry counter at 0x1008E41C. |
+| 11 | 41 | `ASortIn` | `0x10010B08` | 1 | ret 0x4; reads [ebp+0x8] | (char* name). Caps at 0x1900 (6400) entries; writes index n into `word [0x10090860 + n*2]` and lstrcpyA-copies the name into record n of the table pointed to by 0x100836F0, stride 0x80 (128 bytes). An empty or NULL name still consumes an index. Returns 0. |
+| 12 | 21 | `AMitte` | `0x100112B6` | 2 | ret 0x8; reads [ebp+0x8]..[ebp+0xc] | (int voice 0..0x30, int value 0..255). Classifies the value instead of storing it raw: 0x75..0x8B (117..139) writes 0, < 0xF writes 1, > 0xF0 writes 2, anything else is stored as the raw word. Target is voice+0x4A in the 0x84-stride array 0x10095108. Returns 1, or 0 for an out-of-range voice. |
+| 13 | 50 | `ATyp` | `0x10011340` | 1 | ret 0x4; reads [ebp+0x8] | (int product type). Below 0x64 the value goes to 0x1008E358; 0x64..0xC7 sets word 0x10096D7C; 0xC8..0x12B sets word 0x10096D78. Returns 1. |
+| 14 | 10 | `AFenster` | `0x1001148B` | 1 | ret 0x4; reads [ebp+0x8] | (HWND). Stored at 0x1008E378; returns 1. |
+| 15 | 16 | `AInit` | `0x1001149F` | 1 | ret 0x4; reads [ebp+0x8]; 1 internal caller pushes 1 dword | (HWND). Stored at 0x1008E378, then sizes the voice array (0x84 * count at 0x10095108), the 0x124 and 0x2128 blocks, zeroes the 0x12B-dword block at 0x10082B1C, sets 0x10082B68 = 0x7FFF, builds the rate table at 0x100668F0, stores the doubles 1.0/2.0/3.0/4.0 (qwords at 0x10066968/0x10066970/0x10066978/0x10066980), sets the magic and starts the engine thread. Returns the int16 status. |
+| 16 | 52 | `AWaveDauer` | `0x100125A5` | 1 | ret 0x4; reads [ebp+0x8]; 2 internal callers push 1 dword | (char* path). CreateFileA, GetFileSize, ReadFile, CloseHandle; reads the header and derives the duration. Returns the duration dword. |
+| 17 | 55 | `BWaveDauer` | `0x1001284C` | 3 | ret 0xc; reads [ebp+0x8]..[ebp+0x10] | (handle, file offset, fallback). SetFilePointer + ReadFile of 0x10E (270) bytes, then parses the header: "RI" branch takes the length dword at +2 with a +/-1/7 tolerance window, "tP" branch takes a byte at +2 as a chunk skip. Mono (+0x14 word == 1) negates, the +0x16 word and an 8-bit format double it, rate 0x2B11 (44100) x4 and 0x5622 (22050) x2. Returns 0 on a non-WAV header. |
+| 18 | 6 | `ADevice` | `0x10012AEA` | 1 | ret 0x4; no frame argument read; 1 internal caller pushes 1 dword | 1 dword declared but never read; probes waveOut devices and modes, stores the mode word at 0x1008BBE0 and a device id, zeroes the status word, returns 0. |
+| 19 | 18 | `ALautSet` | `0x1001300E` | 1 | ret 0x4; reads [ebp+0x8] | (int level). Stores the level at 0x10082AD8 and calls the mixer fader writer 0x10018B34 (speaker destination line, control type 0x50030001); when that fails it returns 0 without touching MME. Otherwise it maps the level through a `1.0 - level/10000` curve onto 0..0xFFFF, duplicates it into both channels and calls waveOutSetVolume on 0x100829E8 - opening the default waveOut device with the 44.1 kHz stereo 16-bit block at 0x10082AF0 first when 0x10083524 is -1. Returns 0. |
+| 20 | 17 | `ALautGet` | `0x10013182` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; calls the mixer fader reader 0x10018DA6 (speaker destination line, control type 0x50030001), which returns the level normalised to 0..0x8000, and caches it in 0x10082AD8. |
+| 21 | 74 | `RGetName` | `0x1001333C` | 2 | ret 0x8; no frame argument read | 2 dwords declared, neither read: `mov eax,1; ret 8`. A stub in this build, unlike the 1998 build which copied a name here. |
+| 22 | 32 | `ARecTest` | `0x10013348` | 1 | ret 0x4; reads [ebp+0x8] | (char* path). Copies the name to 0x10066810, opens the temp record file, sets up a 44.1 kHz stereo 16-bit WAVEHDR and calls waveInOpen twice (direct, then via `ADSoff`); the result code lands in 0x10096CF8 (0 = open failed, 1 = ok, 2 = busy). Returns it. |
+| 23 | 25 | `ARecDuplex` | `0x10013525` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; sets the duplex flag 0x10096CFC = 1 and returns the int16 status. |
+| 24 | 26 | `ARecInit` | `0x1001353D` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; magic-guarded. Calls `ARecStop`, clears the record globals, opens waveIn, resets the queue, prepares and queues the 40-byte-stride buffer headers at 0x10083020. Returns the int16 status. |
+| 25 | 14 | `AGetString` | `0x10013785` | 2 | ret 0x8; reads [ebp+0x8]..[ebp+0xc] | (char* dest, int selector). Copies one of the temp names (0x100823FC, 0x1008E64C, 0x100829F8, or a wsprintfA of "%spxd32p%c.tmp" into 0x10093AA8) into `dest`. Returns 0. |
+| 26 | 30 | `ARecStart` | `0x1001380D` | 0 | ret (none); no frame argument read | No arguments; magic-guarded. Clears two record counters, calls waveInStart, creates the record file (0x10096DF0) with a 0x2191C0-byte initial size and logs "Fehl beim Rec-Start" if that fails. Returns the int16 status. |
+| 27 | 29 | `ARecPlay` | `0x100138B6` | 0 | ret (none); no frame argument read | No arguments; magic-guarded. Calls `AWaveDauer(0x100823FC)`, i.e. it measures the temp record file rather than a live buffer; returns that duration, or the status word when the magic is missing. |
+| 28 | 27 | `ARecInput` | `0x100138DA` | 1 | ret 0x4; reads [ebp+0x8] | 1 dword declared but never read: it is pushed to the internal mixer routine 0x100188EA and then ignored. That routine sets both channels of the waveIn destination fader (control type 0x50030001) to 0, i.e. it silences the record input. Returns 0. |
+| 29 | 31 | `ARecStop` | `0x10013AA7` | 0 | ret (none); no frame argument read; 4 internal callers push 0 | No arguments; 323 instructions of teardown: waveInReset, waveInUnprepareHeader per buffer, closes the record file, clears the state words. Returns the int16 status. |
+| 30 | 28 | `ARecPegel` | `0x10013FE2` | 1 | ret 0x4; reads [ebp+0x8] | (int selector). Selector 0 returns the live level at 0x10082600, otherwise the peak at 0x10066808. Returns the dword. |
+| 31 | 33 | `ARecTimer` | `0x10013FFB` | 0 | ret (none); no frame argument read; 1 internal caller pushes 0 | No arguments; magic-guarded. Drains the finished waveIn buffers, calls WriteFile on them to the record file, re-prepares and re-queues them, and updates the peak at 0x10066808. Returns the int16 status. |
+| 32 | 9 | `AExport` | `0x1001437D` | 2 | ret 0x8; reads [ebp+0x8]..[ebp+0xc] | (char* name, char* text). Magic-guarded. Writes both strings into 0x10082224 and 0x10096BD8, opens the target with CreateFileA, runs the writer at 0x10013198 once before and once after `AStop`, and toggles 0x100823F8. Returns the int16 status. |
+| 33 | 47 | `AStop` | `0x10014516` | 0 | ret (none); no frame argument read; 5 internal callers push 0 | No arguments; clears the ten transport globals, sets the request word 0x10096D88 = 1 and blocks in the wait loop at 0x100144C9. Returns 1. |
+| 34 | 66 | `Fade` | `0x10014765` | 0 | ret (none); no frame argument read | No arguments; `mov eax,1; ret` - a 9-byte stub. The audio fade of the 1998 build is gone; nothing follows it here. |
+| 35 | 7 | `AEnd` | `0x1001710E` | 0 | ret (none); no frame argument read; 1 internal caller pushes 0 | No arguments; magic-guarded. Calls `AStop`, the thread-stop helper 0x100179FD, clears the state, deletes the four temp files through OpenFile(..., 0x200) and closes the mixer handle 0x100826BC. |
+| 36 | 49 | `ATimer` | `0x1001724B` | 0 | ret (none); no frame argument read | No arguments; `mov eax,1; ret`. The real pump is the internal routine at 0x10017255, immediately after the stub. |
+| 37 | 15 | `AGetTime` | `0x100173C7` | 1 | ret 0x4; reads [ebp+0x8] | (dword flag). Magic-free. Reads waveInGetPosition into a 4-byte TIME sample and/or calls `DGetZeit`, keeps four counters at 0x10096CE4..0x10096CF0, and returns the elapsed time scaled by 5. The argument selects the record branch. |
+| 38 | 38 | `ASetFader` | `0x10017567` | 2 | ret 0x8; reads [ebp+0xc] | (dword unused, int level). Only the second argument is read: it is mapped from 10..30000 onto a signed attenuation (clamped to -0xF60) and pushed into DirectSound vtable +0x3C on 0x10093F50; a failure logs "Fader1" (0x1004B41C). Returns the HRESULT. |
+| 39 | 46 | `AStart` | `0x10017603` | 1 | ret 0x4; reads [ebp+0x8]; 1 internal caller pushes 1 dword | (dword start position). Wrapper at 0x10017603: clears 0x10082BEC, sets the request word 0x10096D88 = 2, stores the position at 0x100829F0, blocks in 0x100144C9 and returns the status. |
+| 40 | 39 | `ASetPfad` | `0x1001773E` | 1 | ret 0x4; reads [ebp+0x8] | (char* prefix). lstrcpyA into 0x100835E0, then calls the internal restart at 0x10014233. Returns 0. |
+| 41 | 23 | `APlay` | `0x1001775B` | 12 | ret 0x30; reads [ebp+0x8]..[ebp+0x34]; internal caller pushes 12 dwords | 12 dwords: sound number (word to event+0x10), name, name2 (either one replaces a NULL twin), three dwords stored at event+0xF4/+0xF8/+0xF0, a string copied to event+0x12, voice index (x0x84 into 0x10095108), start, duration, level, extra (event+0x104). Start/duration/level are masked &~3. Duration <= 0 writes the 0x6921CFF0 sentinel into event+4. Returns 0. |
+| 42 | 1 | `ABilder` | `0x10017883` | 7 | ret 0x1c; reads [ebp+0x8]..[ebp+0x20] | 7 dwords, all stored: 0x1008BAB8, 0x1008BABC, 0x10082B0C, 0x1006680C, 0x100950FC, 0x1007A214, 0x10066800. Returns 0. |
+| 43 | 2 | `ABildpos` | `0x100178C8` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; returns the dword at 0x1008E354. |
+| 44 | 8 | `AExit` | `0x100179DD` | 0 | ret (none); no frame argument read | No arguments; sets the exit flag 0x100826C0 = 1 and signals the event at 0x10093A84 so the worker thread leaves its wait. Returns 1. |
+| 45 | 87 | `RWavePlay` | `0x10017B86` | 0 | ret (none); no frame argument read | No arguments; returns the int16 status word 0x10096DE0 - a stub in this build. |
+| 46 | 91 | `RWaveStop` | `0x10017BC8` | 0 | ret (none); no frame argument read; 3 internal callers push 0 | No arguments; unmaps 0x100825F4, closes the two handles 0x100825F8 / 0x100825F0, clears 0x100825C0, Sleeps and re-runs the internal stop at 0x1001B0FF under lock 0x10082718. Returns the status. |
+| 47 | 84 | `RWaveParam` | `0x10017C4A` | 2 | ret 0x8; reads [ebp+0x8]..[ebp+0xc]; 2 internal callers push 2 dwords | (int index, dword value). Index 0x3C takes a separate path that ends at 0x10095184; every other index writes `value` to 0x10082B1C + index*4 (the 0x12B-dword parameter block). Returns the status. |
+| 48 | 75 | `RGetParam` | `0x10017CD0` | 1 | ret 0x4; reads [ebp+0x8] | (int index). Returns `dword [0x10020020 + index*4]` - the getter that pairs with `RWaveParam`. |
+| 49 | 82 | `RWaveGetTime` | `0x10017CE1` | 0 | ret (none); no frame argument read | No arguments; if 0x10083524 == -1 returns immediately, otherwise calls 0x100186EB and returns 0x10082954. Two counters are mixed, so this is an elapsed-time read. |
+| 50 | 89 | `RWaveSave` | `0x10017D10` | 0 | ret (none); no frame argument read | No arguments; `mov eax,1; ret` with a dummy `push ecx`. Stub. |
+| 51 | 80 | `RWaveFilter` | `0x10017D1D` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; `mov eax,1; ret 4`. Stub. |
+| 52 | 92 | `RWaveTakt` | `0x10017D29` | 0 | ret (none); no frame argument read | No arguments; `mov eax,1; ret`. Stub. |
+| 53 | 51 | `AVbInfoCall` | `0x10017D3D` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; `mov eax,1; ret 4`. The Visual Basic callback hook of the 1998 build is not wired up here. |
+| 54 | 81 | `RWaveGetInfo` | `0x1001844F` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; `xor eax,eax; ret 4`. Stub - returns 0. |
+| 55 | 90 | `RWaveSetInfo` | `0x10018458` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; `mov eax,1; ret 4`. Stub. |
+| 56 | 88 | `RWaveRec` | `0x10018464` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; returns the int16 status word - the file writer moved to `AExport`. |
+| 57 | 76 | `RMenu` | `0x100184B8` | 0 | ret (none); no frame argument read | No arguments; `mov eax,1; ret`. Stub - this build has no popup menu of its own. |
+| 58 | 77 | `RRecoSave` | `0x100184C2` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; if 0x1008B83C == 1 calls 0x1001865B, then returns the status. |
+| 59 | 85 | `RWavePause1` | `0x100184E9` | 0 | ret (none); no frame argument read | No arguments; walks voices 1..0x1C and calls DirectSound vtable +0x48 (Stop) on every active buffer, logging "Play0" (0x1004B440) on failure. Returns the status - this is the pause/stop half. |
+| 60 | 86 | `RWavePause2` | `0x1001858C` | 0 | ret (none); no frame argument read | No arguments; the mirror image of `RWavePause1`: same walk, vtable +0x30 (Play), error string "Play1" (0x1004B448). Returns the status - the resume half. |
+| 61 | 78 | `RTimer` | `0x10018638` | 0 | ret (none); no frame argument read | No arguments; if 0x10096CC8 != 0 calls the internal tick at 0x10015666, then returns the status. |
+| 62 | 20 | `AMemory` | `0x10018697` | 0 | ret (none); no frame argument read; 1 internal caller pushes 0 | No arguments; GlobalMemoryStatus into a 0x20-byte struct, sets the low-RAM word 0x10096D7A = 1 when total physical memory is between 0x3D0900 (4,000,000) and 0xF42400 (16,000,000). Returns the physical total. |
+| 63 | 5 | `ADSoff` | `0x10018706` | 0 | ret (none); no frame argument read; 3 internal callers push 0 | No arguments; calls `DCloseAll` and returns 1 - "audio DirectSound off", used by `ARecTest` to give the device back before retrying waveInOpen. The mixer code that follows at 0x10018715 / 0x100188EA / 0x10018B34 / 0x10018DA6 belongs to separate internal functions, not to this export. |
+| 64 | 13 | `AGetInput` | `0x10019023` | 0 | ret (none); no frame argument read | No arguments; a mixer read, not a waveIn enumeration. It fetches the waveIn destination line (MIXERLINE size 0xA8, component type 7), walks its sources, reads the fader control (type 0x50030001) and its per-channel values, averages the first and last channel and normalises min+max to 0..0x8000. Returns 1 when the mixer handle 0x100826BC is not open and 0x8000 when a mixer call fails. |
+| 65 | 36 | `ASelectMic` | `0x100192A0` | 0 | ret (none); no frame argument read | No arguments; `xor eax,eax` then a jump to the epilogue, so the entry always returns 0 without touching the mixer. The unreachable body at 0x100192B0 is the microphone source selector: it walks the waveIn line controls of class 0x70000000, matches item names against "Microphone" (0x1004B450) and "Micro" (0x1004B45C) and switches those items 1/0 - disabled in this build. |
+| 66 | 93 | `RWaveTransfer` | `0x1001959F` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; takes the lock 0x10082730 and calls the internal copy at 0x10018448. Returns the status. |
+| 67 | 53 | `AWelle` | `0x100195D7` | 3 | ret 0xc; reads [ebp+0x8]..[ebp+0x10] | (int x, int y, char* path). 117 instructions that open the file, build the min/max envelope and merge it into the display path. Returns 0. |
+| 68 | 54 | `AWellePos` | `0x1001973C` | 1 | ret 0x4; no frame argument read | 1 dword declared but never read; `xor eax,eax; ret 4`. Stub. |
+| 69 | 19 | `ALoad` | `0x1001974A` | 1 | ret 0x4; reads [ebp+0x8] | (char* path). Loads one of 200 (0xC8) sample slots at 0x10093B88: OpenFile + _hread, accepts magic 0x44445A53 ("SZDD", Microsoft LZ) and expands it through the LZ32 thunks at 0x10022E4C / 0x10022E46 / 0x10022E40, then CreateDIBSection + CreateCompatibleDC + SelectObject for the thumbnail. Returns 0 on success, the slot is 0x528 bytes. |
+| 70 | 3 | `AClose` | `0x10019CB1` | 1 | ret 0x4; reads [ebp+0x8] | (int slot). Indexes 0x10093B88, calls DeleteDC on slot+0xF8 and DeleteObject on the DIB at slot+0xF4, frees the record and zeroes the slot. Returns 1. |
+| 71 | 4 | `ACloseAll` | `0x10019D5E` | 0 | ret (none); no frame argument read | No arguments; runs the same teardown over all 200 slots and returns 1. |
+| 72 | 83 | `RWaveLaden` | `0x1001A152` | 5 | ret 0x14; reads [ebp+0x8]..[ebp+0x18]; 2 internal callers push 5 dwords | (char* path, int mode, dword a3, dword a4, dword a5). Locks 0x10082718, unmaps the previous file, and unless mode == 0x7B calls `RWavToTemp(path, 0x1008E64C, 0, a3, a4, a5, 0)`; then CreateFileA + CreateFileMappingA + MapViewOfFile on 0x1008E64C, resets the 0x100825D0 mapping/display block and the 0x2760-byte buffer at 0x1008BBF0. Returns 1 on failure, 0 on success. |
+| 73 | 62 | `DStart` | `0x1001ACDA` | 1 | ret 0x4; reads [ebp+0x8]; 1 internal caller pushes 1 dword | (dword). Magic-free DirectSound bring-up: creates the device object with CoCreateInstance (CLSID 0x100434B0, IID 0x100434C0), sets the cooperative level and the 44.1 kHz primary format. Returns the HRESULT. |
+| 74 | 56 | `DCloseAll` | `0x1001B3A1` | 0 | ret (none); no frame argument read; 1 internal caller pushes 0 | No arguments; takes the lock 0x10082718, releases the primary buffer at 0x10093EB0 and the device at 0x10093ED8 through vtable +0x08, logs "Release Sound" (0x1004B4EC), clears the state word 0x10096D50 and returns 0. |
+| 75 | 40 | `ASetPitch` | `0x1001BE5C` | 1 | ret 0x4; reads [ebp+0x8] | (dword bias). For voices 1..0x1C writes `bias + 0x93A8` into slot+0x48 and, when the slot is active, calls DirectSound vtable +0x44 with it, logging "Pitch" (0x1004B560) on failure. Returns 1. The 0x93A8 (37,800) bias is unexplained [guess]. |
+| 76 | 57 | `DGetZeit` | `0x1001C1BD` | 1 | ret 0x4; reads [ebp+0x8]; 3 internal callers push 1 dword | (dword). Advances the DirectSound clock at 0x10096CBC into 0x10093FAC, and when the device is open runs the internal update at 0x1001BF40 twice under lock 0x100950E0. Returns the time dword. |
+| 77 | 60 | `DPlayFileClose` | `0x1001C278` | 1 | ret 0x4; reads [ebp+0x8]; 2 internal callers push 1 dword | (int voice). Indexes the 0xA0-stride array at 0x10093F38: UnmapViewOfFile(slot+0x3C), CloseHandle(slot+0x40) and (slot+0x38), clears four fields. Returns 0/1. |
+| 78 | 59 | `DPlayFileCheck` | `0x1001C44B` | 1 | ret 0x4; reads [ebp+0x8] | (int voice). Compares the mapped-file field slot+0x38 with 0, calls `DGetZeit` and compares the result against slot+0x44. Returns 0/1 - a "has this voice run out of mapped data" poll. |
+| 79 | 58 | `DPlayFile` | `0x1001C49A` | 3 | ret 0xc; reads [ebp+0x8]..[ebp+0x10] | (char* path, dword a2, int voice). Opens the file, maps it (CreateFileA / GetFileSize / CreateFileMappingA / MapViewOfFile) and computes the 0x3B1-entry peak table at 0x1008F774 from timeGetTime for voices >= 0xA; then hands view, length and a2 to the voice's DirectSound buffer via 0x1001BAE5 and 0x1001BD99. Returns 1. |
+| 80 | 61 | `DPlayUpdate` | `0x1001DE49` | 0 | ret (none); no frame argument read | No arguments; skips out when the device is closed, the record word 0x100823F8 is 1 or the state word 0x10096CC8 is 0; otherwise closes every finished voice via `DPlayFileClose` and runs the internal mixer step 0x1001D74E under lock 0x10082718. Returns the step result. |
+| 81 | 24 | `APos` | `0x1001DF0F` | 1 | ret 0x4; reads [ebp+0x8] | (dword position). Stores into 0x1008BBD8 and returns 1. |
+| 82 | 48 | `ATest` | `0x1001DF23` | 2 | ret 0x8; no frame argument read | (dword, dword). Both arguments are ignored; `mov eax,1; ret 8`. Returns 1. |
+| 83 | 73 | `REffekt` | `0x1001E73F` | 2 | ret 0x8; reads [ebp+0x8]..[ebp+0xc] | (char* command, int value). String-command dispatcher: lstrcmpiA against the table at 0x1004B620 ("GetPlayStatus", "CutOff", "EchoTime", "LoopMode", "PlayMatrix", "MetroStart", "StretchMode", "RecordAn", ...) and writes the effect globals 0x10082B6C-0x10082BA4 and 0x10090758-0x10090778. Returns the command result in EAX (0x10096CB4 / 0x10096CB8 for the two getters). |
+| 84 | 72 | `RDrum` | `0x1001EE3A` | 3 | ret 0xc; reads [ebp+0x8]..[ebp+0x10]; 1 internal caller pushes 3 dwords | (char* command, int value, int extra). The drum half of the same dispatcher: "ADrum", "LDrum", "DrumPitch", "DrumPan", ... write 0x1009071C-0x1009076C, 0x1008E824-0x1008E830 and the 0x3B1-entry (945) peak table at 0x1008F774. Returns the result. |
+| 85 | 94 | `RpDrum` | `0x1001F78C` | 3 | ret 0xc; reads [ebp+0x8]..[ebp+0x10] | (int, int, int). 11 instructions: pushes its three arguments unchanged and calls `RDrum` - a forwarding wrapper rather than a re-order, because both functions clean 0xc. Returns whatever `RDrum` returns. |
+| 86 | 79 | `RWavToTemp` | `0x10020290` | 7 | ret 0x1c; reads [ebp+0x8]..[ebp+0x20]; 1 internal caller pushes 7 dwords | (char* in, char* out, int drive, dword, dword, dword, dword). The WAV reader/converter, 912 instructions. Caches the conversion by the triple 0x10096D24/0x10096D28/0x10096D2C; arg3 selects the temp drive through wsprintfA("%spxd32p%c.tmp", ..., arg3 + 0x63) at 0x1002071C. Returns the status. |
+| 87 | 37 | `ASetCur` | `0x1002177D` | 1 | ret 0x4; reads [ebp+0x8] | (int off). Cursor switch: when `off` is 0 it lazily LoadCursorA(0x7F8A) and SetCursor()s it (saving the previous cursor in 0x100826F4), otherwise it restores that cursor. Returns 1. |
+| 88 | 63 | `Debimem` | `0x100217DD` | 1 | ret 0x4; reads [ebp+0x8] | (char* tag). Dumps a debug line: GlobalMemoryStatus plus the seven counters in the struct, formatted with "%s ML:%ld TP:%ld AP:%ld TPa:%ld ..." (0x1004B9F8) and appended to c:\memo.txt. Returns 1. |
+| 89 | 68 | `PInit` | `0x10022318` | 0 | ret (none); no frame argument read | No arguments; convenience sequence `ADevice(0)`, `AInit(0)`, `RWaveParam(0x3C, 0x7D00)`. Returns 0. |
+| 90 | 67 | `PClose` | `0x10022339` | 0 | ret (none); no frame argument read | No arguments; `AStop()` then `AEnd()`. Returns 0. |
+| 91 | 70 | `PStart` | `0x1002234A` | 0 | ret (none); no frame argument read | No arguments; `AStart(0xA80F570)` then `RWaveParam(0x32, 1)`. Returns 0. |
+| 92 | 71 | `PStop` | `0x10022364` | 0 | ret (none); no frame argument read | No arguments; `AStop()`. Returns 0. |
+| 93 | 69 | `PPlay` | `0x10022370` | 6 | ret 0x18; reads [ebp+0x8]..[ebp+0x1c] | 6 dwords; pushes five zeros and the literal "c" (0x1004B304) plus the six arguments into `APlay`, i.e. `APlay(0,0,0,0,0,"c",a1..a6)` - the single-character command form of the event call. Returns 0. |
+| 94 | 95 | `Stretcher` | `0x100223A5` | 4 | ret 0x10; reads [ebp+0x8]..[ebp+0x14] | (dword, dword, float ratio, dword). Compares the float ratio with the double 0.1 at 0x10043418; above it calls the object method 0x1000506E on 0x1008B8F0, otherwise 0x10005444, and returns the method result. 4 dwords, one of them a float. |
+| 95 | 35 | `ARegUnIn` | `0x10022460` | 2 | ret 0x8; reads [ebp+0x8]..[ebp+0xc] | (char* uninstall string, char* display name). RegCreateKeyExA(HKLM, "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dance eJay3", 0x1004BAA4), then RegSetValueExA "DisplayName" = arg2 and "UninstallString" = arg1, RegCloseKey. Returns 1. |
+| 96 | 34 | `ARegDelete` | `0x100224FB` | 0 | ret (none); no frame argument read | No arguments; RegDeleteKeyA(HKLM, 0x1004BB00) and returns 1. |
+<!--ARITY-ROWS:END-->
+
+### How far to trust each column
+
+* **Argument count — high confidence.** Two independent encodings of the same fact (the `ret` immediate
+  and the frame offsets) agree wherever an argument is read, and all 34 in-image call sites match the
+  callee's `ret N / 4` exactly. No function showed `[ebp+N]` beyond `4 + ret immediate`.
+* **The 37 zero-argument rows.** A `__cdecl` function with no parameters also compiles to a bare `ret`,
+  so for those rows "who cleans the stack" is not observable. The arity itself (zero) is certain,
+  because no such function reads a positive frame slot.
+* **Parameter types are inferences, not symbols.** A slot is called `char*` because it is handed to
+  `lstrcpyA`/`OpenFile`/`CreateFileA`, `int16` because it is moved with a word-sized `mov`, `HWND`
+  because it lands in the global the window code reads. Treat the last column as a reading guide.
+* **The last column is prose, not decompiled source.** It says what the body demonstrably does with each
+  slot; the wider meaning of a value (e.g. what `0x93A8` in `ASetPitch` is for) is marked in
+  `PXD32D5-D4-engine.md` with a confidence tag.
+* **Undecorated names mean the arity cannot be cross-checked against a name.** `APlay` could be renamed
+  without changing the export table, so the counts above come only from code.
+* **The ordinal column cannot be read off the row number.** The name pointer table at `0x10049BD8` is
+  sorted alphabetically and the ordinal table at `0x10049D58` runs 0…95 in that same order, so ordinals
+  and RVAs are unrelated (see above). Resolve an ordinal through the export directory, not through
+  `PXD32D5-D4.md`'s row order.
+
+### Artifacts
+
+Scripts and listings that live next to the DLL. All paths are resolved from the script's own directory,
+so the folder can be moved.
+
+| File | Purpose |
+|---|---|
+| `_pxd_headers.py` | Prints PE headers, section table and data directories. No Capstone needed. |
+| `_pxd_conventions.py` | Loads the PE, walks the export and import tables, sweeps and disassembles every export, prints the per-function evidence summary and rewrites `_pxd_detail.txt`. |
+| `_pxd_rows.py` | Regenerates the table above (evidence from the sweep, prose from its `notes` dictionary); writes `_pxd_rows.md` as a byproduct. |
+| `_pxd_dump.py` | `python _pxd_dump.py APlay AInit` — full annotated disassembly with calls resolved to export names and `call [IAT]` resolved through the import table. Accepts `0xlo-0xhi` ranges for the unexported helpers. |
+| `_pxd_calls.py` | `python _pxd_calls.py REffekt RDrum` — call map plus data references, for orienting inside a long export. |
+| `_pxd_xref.py` | Compares each callee's `ret N / 4` with the push counts seen at in-image call sites. |
+| `_pxd_strings.py` | ASCII/Latin-1 string inventory with absolute VAs; writes `_pxd_strings.txt`. |
+| `_pxd_imports.py` | Resolved import inventory (`IAT_VA  dll!name`); writes `_pxd_imports.txt`. |
+| `_pxd_peek.py` | `python _pxd_peek.py 0x1004B304` — 32 bytes at an absolute VA, hex + ASCII. |
+| `_pxd_detail.txt` | Function heads, frame offsets and `ret` forms for all 96 exports. |
+| `_pxd_imports.txt`, `_pxd_strings.txt` | Generated evidence for the strings/imports document. |
+
+They need Capstone for the disassembly passes; on this machine it is installed in a scratch directory
+and used through `PYTHONPATH` (`C:\Users\dacruzgo\AppData\Local\Temp\caplib`), never in a project
+environment. Full handover notes are in `PXD32D5-D4-worklog.md`.
+
+## Caveats that apply to the table above
+
+The arity and convention columns stand. The prose column was written from a full read of each body, and
+`PXD32D5-D4-engine.md` is where the behaviour is argued. Four traps shaped the readings:
+
+* **An export's body ends at its `ret`.** Internal functions and their literals live in the gaps between
+  export RVAs, so "address is between export A and export B" does not mean "address belongs to export
+  A". `ATimer` is a 9-byte stub; the scheduler is the internal routine at `0x10017255` immediately after
+  it.
+* **Never name an import from its IAT slot.** Resolve `0x1004xxxx` through the import table first
+  (`_pxd_imports.py` or `_pxd_dump.py`). The slots in this image are not in the order the names suggest.
+* **`ADevice` really does ignore its argument**, and so do the other fourteen rows marked "no frame
+  argument read". They must still be called with the full argument list.
+* **`RGetName`, `RWaveRec`, `RWaveGetInfo`, `RWaveSetInfo`, `RMenu`, `Fade` are stubs in this build**
+  (`mov eax,1; ret` or similar), even though the same names have real bodies in the 1998 build. Do not
+  carry behaviour across from the older document.
+
+The full list of changed readings is "Corrections to earlier readings" in `PXD32D5-D4-worklog.md`.

@@ -1,0 +1,258 @@
+{
+  "Dance eJay": {
+    "year": 1997,
+    "developer": "eJay GmBH",
+    "iso": "https://dn721802.ca.archive.org/0/items/eJaycollection/GenerationPack1.iso",
+    "root": "Dance",
+    "skip": [
+      "DANCEJAY.EXE",
+      "DEINSTAL.EXE",
+      "EJAY_DEMOS.EXE",
+      "INTERNET.HTM",
+      "SETUP.EXE"
+    ]
+  },
+  "Rave eJay": {
+    "year": 1998,
+    "developer": "eJay GmBH",
+    "iso": "https://dn721802.ca.archive.org/0/items/eJaycollection/GenerationPack1.iso",
+    "root": "Rave",
+    "skip": [
+      "DEINSTAL.EXE",
+      "eJay_Demos.EXE",
+      "INTERNET.HTM",
+      "RAVE.EXE",
+      "SETUP.EXE"
+    ]
+  },
+  "Dance 2": {
+    "year": 1999,
+    "developer": "eJay GmBH",
+    "iso": "https://dn721802.ca.archive.org/0/items/eJaycollection/Dance_eJay2.iso",
+    "skip": [
+      "Acrobat Reader",
+      "SETUP.EXE",
+      "DANCE2.EXE",
+      "DEINSTAL.EXE",
+      "www.eJay.fr.htm",
+      "www.eJay.com.htm",
+      "www.eJay.de.html",
+      "AUTORUN.INF",
+      "D_ejay2/start"
+    ]
+  },
+  "Hiphop eJay": {
+    "year": 1999,
+    "developer": "eJay GmBH",
+    "iso": "https://dn721802.ca.archive.org/0/items/eJaycollection/GenerationPack1.iso",
+    "root": "HipHop",
+    "skip": [
+      "DEINSTAL.EXE",
+      "EJAY_DEMOS.EXE",
+      "HIPHOP.EXE",
+      "HIPHOP.GID",
+      "INTERNET.HTM",
+      "SETUP.EXE"
+    ]
+  },
+  "Techno eJay": {
+    "year": 1999,
+    "developer": "eJay GmBH",
+    "iso": "https://dn721802.ca.archive.org/0/items/eJaycollection/TECHNO_EJAY.iso",
+    "root": null,
+    "skip": [
+      "DEMO",
+      "AUTORUN.INF",
+      "DEINSTAL.EXE",
+      "DX3SETUP.EXE",
+      "INTERNET.HTM",
+      "SETUP.EXE",
+      "TECHNO.EXE"
+    ]
+  },
+  "Dance 2+": {
+    "year": 2000,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Dance 3": {
+    "year": 2000,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Hiphop 2": {
+    "year": 2000,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Techno 2": {
+    "year": 2000,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "360 Xtreme Soundtraxx": {
+    "year": 2001,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Dance 4": {
+    "year": 2001,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Dance 5": {
+    "year": 2001,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Hiphop 3": {
+    "year": 2001,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Dance 6": {
+    "year": 2002,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "DJ Mixstation": {
+    "year": 2002,
+    "developer": "Atomix",
+    "iso": null
+  },
+  "Techno 3": {
+    "year": 2002,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "DJ Mixstation 2": {
+    "year": 2003,
+    "developer": "Atomix",
+    "iso": null
+  },
+  "Hiphop 4": {
+    "year": 2003,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "DJ Mixstation 3": {
+    "year": 2004,
+    "developer": "Atomix",
+    "iso": null
+  },
+  "Hiphop 5": {
+    "year": 2004,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Techno 4": {
+    "year": 2004,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "Dance 7": {
+    "year": 2005,
+    "developer": "Checkmate Solutions",
+    "iso": null
+  },
+  "Hiphop 6": {
+    "year": 2005,
+    "developer": "Checkmate Solutions",
+    "iso": null
+  },
+  "Mix CD Producer": {
+    "year": 2005,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Techno 5": {
+    "year": 2006,
+    "developer": "Checkmate Solutions",
+    "iso": null
+  },
+  "Rave 1": {
+    "year": 2007,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "House 1": {
+    "year": 2007,
+    "developer": "eJay GmBH",
+    "iso": null
+  },
+  "R & B 1": {
+    "year": 2007,
+    "developer": "Tantrumedia",
+    "iso": null
+  },
+  "Virtual Music Studio": {
+    "year": 2007,
+    "developer": "Tantrumedia",
+    "iso": null
+  },
+  "Virtual Music Manager": {
+    "year": 2007,
+    "developer": "Helium",
+    "iso": null
+  },
+  "DJ Mixstation 4": {
+    "year": 2008,
+    "developer": "MixVibes",
+    "iso": null
+  },
+  "Virtual Sounds 1": {
+    "year": 2008,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Virtual Sounds 2": {
+    "year": 2008,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Virtual Sounds 3": {
+    "year": 2008,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Legends 1": {
+    "year": 2008,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Legends 2": {
+    "year": 2008,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Legends 3": {
+    "year": 2008,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Video & Music Exchange": {
+    "year": 2010,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Dance 6 Reloaded": {
+    "year": 2010,
+    "developer": "eJay",
+    "iso": null
+  },
+  "Hip Hop 5 Reloaded": {
+    "year": 2010,
+    "developer": "eJay",
+    "iso": null
+  },
+  "DJ Mixstation 4 Reloaded": {
+    "year": 2010,
+    "developer": "eJay",
+    "iso": null
+  },
+  "eQuality": {
+    "year": null,
+    "developer": "Tantrumedia",
+    "iso": null
+  }
+}

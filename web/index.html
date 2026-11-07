@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PXD &rarr; WAV</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    /* stretch to cover the whole page, keeping the aspect ratio */
+    background: #111 url("background.webp") center center / cover no-repeat fixed;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  main {
+    width: min(560px, 92vw);
+  }
+  #drop {
+    box-sizing: border-box;
+    padding: 48px 24px;
+    text-align: center;
+    border: 3px dashed rgba(255, 255, 255, .75);
+    border-radius: 18px;
+    background: rgba(0, 0, 0, .45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .15s;
+    user-select: none;
+  }
+  #drop.over {
+    background: rgba(0, 0, 0, .65);
+    border-color: #7fdcff;
+    transform: scale(1.02);
+  }
+  #drop h1 {
+    margin: 0 0 8px;
+    font-size: 1.6rem;
+    letter-spacing: .02em;
+  }
+  #drop p {
+    margin: 0;
+    opacity: .85;
+  }
+  #results {
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #results li {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, .6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-size: .92rem;
+  }
+  #results li.error {
+    background: rgba(120, 0, 0, .7);
+  }
+  #results .name {
+    font-weight: 600;
+    word-break: break-all;
+  }
+  #results .info {
+    opacity: .8;
+    margin: 2px 0 8px;
+  }
+  #results .comment {
+    opacity: .7;
+    font-size: .82rem;
+    margin: 0 0 8px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  #results .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  #results a.dl {
+    display: inline-block;
+    padding: 7px 14px;
+    border-radius: 8px;
+    background: #2aa8e0;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  #results a.dl:hover {
+    background: #4cc1f5;
+  }
+  #results audio {
+    height: 34px;
+    flex: 1;
+    min-width: 180px;
+  }
+</style>
+</head>
+<body>
+<main>
+  <div id="drop" tabindex="0">
+    <h1>Drop a .pxd file here</h1>
+    <p>or click to choose one &mdash; it is converted in your browser and never uploaded</p>
+  </div>
+  <ul id="results"></ul>
+  <input id="file" type="file" accept=".pxd" multiple hidden>
+</main>
+
+<!-- ======================================================================
+     Decoder core: a JavaScript port of decompiled/src/pxd32d5.py, reduced to
+     the path pxd2wav.py takes for a .pxd input:
+
+       PInit -> RWavToTemp(src, dst, 0, None, 0, 0, tail=0) -> PClose
+
+     i.e. awave_dauer + _parse_header (sub_10019DEE) + the a3 <= 0 conversion
+     loop + the "tP" DPCM/code-book decoder (sub_10016361) + the 44-byte
+     mono 16-bit 44.1 kHz RIFF header (sub_10013198).
+     No file system, no backend: bytes in, bytes out.
+     ====================================================================== -->
+<script>
+"use strict";
+
+const PXD = (function () {
+  // --- constants from the decompilation -----------------------------------
+  const BUFFER_SAMPLES = 75600;        // dword_1004B2EC
+  const DECODE_BLOCK = 75632;          // session.block_size
+  const SCRATCH_CLEAR = 0x127B0;       // bytes zeroed before every decode
+  const DECODER_SLACK = 1024;
+  const DECODE_TAIL = 220;             // bytes of input header the DLL keeps
+  const WAV_HEADER_SIZE = 44;
+  const BOOK_SIZE = 8100;              // sub_1001186B: malloc(0x1FA4)
+  const SAMPLE_RATE = 44100;
+  // PInit/AInit: pan = 512, volume = 0x10000  ->  (pan * volume) >> 8
+  const GAIN = (512 * 0x10000) >> 8;   // = 131072 (2x)
+  const MAX_OUTPUT_BYTES = 1 << 29;    // sanity limit for corrupt headers
+
+  const wrap16 = (v) => (v << 16) >> 16;   // int16 wrap-around
+
+  // sub_10011EFF: the 256-entry delta code book (dword_1008E350)
+  function makeDeltaTable() {
+    let v1 = 2.2, v20 = 1.0565;
+    const t = new Array(257).fill(0);
+    for (let j = 1; j < 128; j++) {
+      if (j >= 6) t[j + 128] = Math.trunc(v1 - 0.52) + t[j + 127];
+      else t[j + 128] = t[j + 127] + 1;
+      v1 *= v20;
+      v20 -= 0.00022;
+    }
+    for (let k = 1; k <= 128; k++) t[128 - k] = -t[k + 128];
+    const out = new Int16Array(256);
+    for (let m = 0; m < 256; m++) out[m] = t[m] * 2;   // wraps to int16
+    return out;
+  }
+  const DELTA_TABLE = makeDeltaTable();
+
+  // One decoder step: out[off] += (acc * gain) >> 16 with saturation.
+  // Like the DLL, the clamp is chosen from the sign of the *wrapped* sum, so a
+  // positive overflow becomes 0x8000.
+  function emit(dv, off, acc) {
+    const prod = acc * GAIN;
+    let sample;
+    if (prod > 0x7FFFFFFF || prod < -0x80000000) {
+      sample = prod > 0 ? 0x7FFF : 0x8000;
+    } else {
+      sample = (prod >> 16) & 0xFFFF;
+    }
+    const a = dv.getInt16(off, true);
+    const b = (sample << 16) >> 16;
+    const total = a + b;
+    if (total >= -0x8000 && total <= 0x7FFF) {
+      dv.setUint16(off, total & 0xFFFF, true);
+    } else {
+      dv.setUint16(off, (total & 0x8000) ? 0x8000 : 0x7FFF, true);
+    }
+  }
+
+  // sub_10016361 - the "tP" DPCM / code-book decoder.
+  //   0x00..0xF3  play code-book entry <byte>
+  //   0xFF        one step from the shared delta table
+  //   0xF4..0xFE  (re)define an entry: [index] + (opcode-0xF3) delta indices,
+  //               then play that entry
+  // Entry n lives at book + 16*n as int16 deltas terminated by 0xFFFF; the
+  // deltas are integrated into a 16-bit accumulator.  The left channel only
+  // is written (4-byte stride).  Returns the number of bytes produced.
+  function decodeTp(st, dv, base, maxFrames) {
+    const src = st.src;
+    const book = st.bookDv;
+    const end = st.end;
+    const hard = maxFrames + 64;       // safety net, well past one entry
+    let pos = st.pos;
+    let acc = st.acc;                  // 16-bit integrator, persists
+    let frames = 0;
+    let off = base;
+
+    const rd = (p) => {
+      if (p >= src.length) throw new Error("Unexpected end of stream");
+      return src[p];
+    };
+
+    while (frames < maxFrames && pos < end) {
+      const c = rd(pos);
+      let e;
+      if (c >= 0xF4) {
+        if (c !== 0xFF) {
+          pos++;
+          const idx = rd(pos);
+          const count = c - 0xF3;
+          e = (16 * idx) & 0xFFFF;
+          pos++;
+          for (let k = 0; k < count; k++) {
+            book.setInt16((e + 2 * k) & 0xFFFF, DELTA_TABLE[rd(pos)], true);
+            pos++;
+          }
+          book.setUint16((e + 2 * count) & 0xFFFF, 0xFFFF, true);
+        } else {
+          pos++;
+          acc = wrap16(acc + DELTA_TABLE[rd(pos)]);
+          pos++;
+          emit(dv, off, acc);
+          off += 4;
+          frames++;
+          continue;
+        }
+      } else {
+        e = (16 * c) & 0xFFFF;
+        pos++;
+      }
+
+      // play one book entry; bounds are only re-checked once an entry is
+      // finished, so an entry is never cut in half
+      for (;;) {
+        let d = book.getInt16(e & 0xFFFF, true);
+        if (d === -1) break;
+        acc = wrap16(acc + d);
+        emit(dv, off, acc);
+        off += 4; frames++; e += 2;
+        if (frames >= hard) break;
+        d = book.getInt16(e & 0xFFFF, true);
+        if (d === -1) break;
+        acc = wrap16(acc + d);
+        emit(dv, off, acc);
+        off += 4; frames++; e += 2;
+        if (frames >= hard) break;
+      }
+      if (frames >= hard) break;
+    }
+
+    st.acc = acc;
+    st.pos = pos;
+    return 4 * frames;
+  }
+
+  // sub_10013198 - the 44-byte mono 16-bit 44.1 kHz RIFF header
+  function writeRiffHeader(out, dataLen) {
+    const dv = new DataView(out.buffer, out.byteOffset, out.byteLength);
+    const ascii = (o, s) => { for (let i = 0; i < 4; i++) out[o + i] = s.charCodeAt(i); };
+    ascii(0, "RIFF");
+    dv.setUint32(4, dataLen + 36, true);
+    ascii(8, "WAVE");
+    ascii(12, "fmt ");
+    dv.setUint32(16, 16, true);
+    dv.setUint16(20, 1, true);                 // WAVE_FORMAT_PCM
+    dv.setUint16(22, 1, true);                 // mono
+    dv.setUint32(24, SAMPLE_RATE, true);
+    dv.setUint32(28, SAMPLE_RATE * 2, true);   // byte rate
+    dv.setUint16(32, 2, true);                 // block align
+    dv.setUint16(34, 16, true);                // bits per sample
+    ascii(36, "data");
+    dv.setUint32(40, dataLen, true);
+  }
+
+  // pxd bytes (Uint8Array) -> { wav: Uint8Array, frames, seconds }
+  function pxdToWav(buf) {
+    // awave_dauer: the DLL needs at least 0x10E bytes of header
+    if (buf.length < 270) throw new Error("File too small to be a .pxd");
+    if (buf[0] !== 0x74 || buf[1] !== 0x50) {   // 't' 'P'
+      throw new Error("Not a tP-coded .pxd stream");
+    }
+    const inDv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+
+    // awave_dauer, "tP" branch: i32 frame count at (byte[4] + 6)
+    const declaredFrames = inDv.getInt32(buf[4] + 6, true);
+    const dataBytes = 2 * declaredFrames;        // v14: mono 16 bit bytes
+    if (dataBytes <= 0) throw new Error("Stream declares no audio");
+    if (dataBytes > MAX_OUTPUT_BYTES) throw new Error("Declared length is implausibly large");
+
+    // container comment: offset 5, length (h[4] - 1), ASCII
+    const commentLen = buf[4] - 1;
+    const comment = commentLen > 0
+      ? new TextDecoder().decode(buf.subarray(5, 5 + commentLen)).replace(/\u0000/g, "").trim()
+      : "";
+
+    // _parse_header (sub_10019DEE): audio starts at 4 + h[4] + 8
+    const headLen = Math.min(DECODE_TAIL, buf.length);
+    let p = 4;
+    p += buf[p];
+    p += 2;
+    p += 4;
+    p += 2;
+
+    const st = {
+      src: buf,
+      pos: Math.min(p, headLen),   // read_offset
+      end: buf.length,             // stream_end
+      acc: 0,                      // vol_word (DPCM integrator)
+      bookDv: null,
+    };
+    const book = new Uint8Array(BOOK_SIZE);
+    st.bookDv = new DataView(book.buffer);
+    // entry 0 = 0,0,0,0,0,-1
+    st.bookDv.setInt16(10, -1, true);
+
+    // destination, preallocated like the DLL
+    const outLen = dataBytes + DECODE_BLOCK + WAV_HEADER_SIZE + 64 + DECODER_SLACK;
+    const out = new Uint8Array(outLen);
+    const dv = new DataView(out.buffer);
+    const maxFrames = DECODE_BLOCK >> 2;         // 18908
+
+    // the a3 <= 0 loop: decode stereo, keep the left channel, repeat
+    let writeOffset = 0;
+    for (;;) {
+      const base = WAV_HEADER_SIZE + writeOffset;
+      out.fill(0, base, Math.min(base + SCRATCH_CLEAR, outLen));
+      const produced = decodeTp(st, dv, base, maxFrames);
+      const j = produced >> 2;
+      for (let i = 0; i < j; i++) {              // left channel only
+        dv.setInt16(base + 2 * i, dv.getInt16(base + 4 * i, true), true);
+      }
+      writeOffset += 2 * j;
+      if (!(j !== 0 && writeOffset < dataBytes && st.pos < st.end)) break;
+    }
+
+    writeRiffHeader(out, dataBytes);
+    const wav = out.slice(0, WAV_HEADER_SIZE + dataBytes);
+    return { wav, frames: dataBytes / 2, seconds: dataBytes / 2 / SAMPLE_RATE, comment };
+  }
+
+  return { pxdToWav };
+})();
+</script>
+
+<script>
+"use strict";
+
+(function () {
+  const drop = document.getElementById("drop");
+  const input = document.getElementById("file");
+  const results = document.getElementById("results");
+
+  function addResult(file, outcome) {
+    const li = document.createElement("li");
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = file.name;
+    li.appendChild(name);
+
+    if (outcome.comment) {
+      const c = document.createElement("div");
+      c.className = "comment";
+      c.textContent = outcome.comment;
+      li.appendChild(c);
+    }
+
+    if (outcome.error) {
+      li.className = "error";
+      const info = document.createElement("div");
+      info.className = "info";
+      info.textContent = outcome.error;
+      li.appendChild(info);
+    } else {
+      const wavName = file.name.replace(/\.[^.]*$/, "") + ".wav";
+      const url = URL.createObjectURL(new Blob([outcome.wav], { type: "audio/wav" }));
+
+      const info = document.createElement("div");
+      info.className = "info";
+      info.textContent = outcome.frames + " frames \u00b7 " + outcome.seconds.toFixed(2) +
+        " s \u00b7 " + outcome.wav.length + " bytes \u00b7 44.1 kHz mono 16-bit";
+      li.appendChild(info);
+
+      const row = document.createElement("div");
+      row.className = "row";
+      const a = document.createElement("a");
+      a.className = "dl";
+      a.href = url;
+      a.download = wavName;
+      a.textContent = "Download " + wavName;
+      row.appendChild(a);
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = url;
+      row.appendChild(audio);
+      li.appendChild(row);
+    }
+    results.prepend(li);
+  }
+
+  async function handle(files) {
+    for (const file of files) {
+      try {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        addResult(file, PXD.pxdToWav(bytes));
+      } catch (err) {
+        addResult(file, { error: err && err.message ? err.message : String(err) });
+      }
+    }
+  }
+
+  drop.addEventListener("click", () => input.click());
+  drop.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
+  });
+  input.addEventListener("change", () => { handle(Array.from(input.files)); input.value = ""; });
+
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => {
+    e.preventDefault();
+    drop.classList.add("over");
+  }));
+  ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => {
+    e.preventDefault();
+    drop.classList.remove("over");
+  }));
+  drop.addEventListener("drop", (e) => handle(Array.from(e.dataTransfer.files)));
+
+  // allow dropping anywhere on the page, and stop the browser from opening the file
+  window.addEventListener("dragover", (e) => e.preventDefault());
+  window.addEventListener("drop", (e) => {
+    e.preventDefault();
+    if (!drop.contains(e.target)) handle(Array.from(e.dataTransfer.files));
+  });
+})();
+</script>
+</body>
+</html>
